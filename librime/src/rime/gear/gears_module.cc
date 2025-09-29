@@ -35,6 +35,7 @@
 #include <rime/gear/uniquifier.h>
 #include <rime/registry.h>
 #include <rime_api.h>
+#include <rime/gear/llm.h>
 
 static void rime_gears_initialize() {
   using namespace rime;
@@ -51,6 +52,7 @@ static void rime_gears_initialize() {
   r.Register("key_binder", new Component<KeyBinder>);
   r.Register("navigator", new Component<Navigator>);
   r.Register("punctuator", new Component<Punctuator>);
+  r.Register("llm", new Component<Llm>);
   r.Register("recognizer", new Component<Recognizer>);
   r.Register("selector", new Component<Selector>);
   r.Register("speller", new Component<Speller>);
@@ -67,6 +69,7 @@ static void rime_gears_initialize() {
   // translators
   r.Register("echo_translator", new Component<EchoTranslator>);
   r.Register("punct_translator", new Component<PunctTranslator>);
+  r.Register("llm_translator", new Component<LlmTranslator>);
   r.Register("table_translator", new Component<TableTranslator>);
   r.Register("script_translator", new Component<ScriptTranslator>);
   r.Register("r10n_translator", new Component<ScriptTranslator>);  // alias

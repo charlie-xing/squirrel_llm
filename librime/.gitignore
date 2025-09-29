@@ -7,7 +7,6 @@ include/*
 lib/*
 bin/*
 share/*
-deps/*/*
 plugins/*/
 env.bat
 node_modules/
