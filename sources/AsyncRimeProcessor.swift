@@ -32,7 +32,7 @@ final class AsyncRimeProcessor {
 
     // 输入状态跟踪
     private var hasActiveInput = false
-    private var inputSessionActive = false // 输入会话是否活跃
+    private var inputSessionActive = false  // 输入会话是否活跃
     private let inputStateLock = NSLock()
 
     init(rimeAPI: RimeApi_stdbool, session: RimeSessionId, delegate: AsyncRimeProcessorDelegate) {
@@ -121,7 +121,7 @@ final class AsyncRimeProcessor {
             startInputSession()
         }
 
-        // 执行实际的rime处理(DELAY TODO:此处还需要细化区分，如果按键是特殊控制字符或者标点符号，就需要实时处理按键)
+        // 执行实际的rime处理
         let handled = rimeAPI.process_key(session, Int32(keycode), Int32(modifiers))
 
         // 再次检查是否仍然是最新请求
@@ -236,7 +236,7 @@ final class AsyncRimeProcessor {
 
     func clearComposition() {
         rimeAPI.clear_composition(session)
-        endInputSession() // 清空输入时结束会话
+        endInputSession()  // 清空输入时结束会话
     }
 
     func getInput() -> String? {
