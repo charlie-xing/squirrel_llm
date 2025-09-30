@@ -248,6 +248,7 @@ ProcessResult Llm::ProcessKeyEvent(const KeyEvent& key_event) {
     }
 
     // Input is too short or no cached result is available yet.
+    lastResult = "";
     return nullptr;
   }
 }  // namespace rime
