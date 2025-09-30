@@ -236,8 +236,6 @@ final class SquirrelInputController: IMKInputController {
 
     override func deactivateServer(_ sender: Any!) {
         // print("[DEBUG] deactivateServer: \(sender ?? "nil")")
-        // 退出输入法时结束输入会话
-        asyncProcessor?.endInputSession()
         hidePalettes()
         commitComposition(sender)
         client = nil
@@ -266,7 +264,7 @@ final class SquirrelInputController: IMKInputController {
             if let processor = asyncProcessor {
                 if let input = processor.getInput() {
                     commit(string: input)
-                    processor.clearComposition() // 这会自动调用 endInputSession()
+                    processor.clearComposition()
                 }
             } else {
                 if let input = rimeAPI.get_input(session) {
@@ -430,7 +428,9 @@ extension SquirrelInputController {
         if session != 0 {
             updateAppOptions()
             // 初始化异步处理器
-            asyncProcessor = AsyncRimeProcessor(rimeAPI: rimeAPI, session: session, delegate: self)
+            //asyncProcessor = AsyncRimeProcessor(rimeAPI: rimeAPI, session: session, delegate: self)
+            //用同步处理，在panel上加定时器来更新内容
+            asyncProcessor = nil
         }
     }
 
@@ -701,12 +701,12 @@ extension SquirrelInputController {
                 page: page, lastPage: lastPage)
             _ = rimeAPI.free_context(&ctx)
         } else {
-            // 在异步模式下，只有在输入会话不活跃时才隐藏面板
+            // 在异步模式下，如果有活跃输入则不隐藏面板
             if let processor = asyncProcessor {
-                if !processor.isInputSessionActive() {
+                if !forceShowPanel && !processor.hasInput() {
                     hidePalettes()
                 }
-                // 如果输入会话活跃，保持面板显示，不管是否能获取到context
+                // 如果 forceShowPanel 为 true 或有输入内容，保持面板显示
             } else {
                 // 同步模式下的原有逻辑
                 hidePalettes()
