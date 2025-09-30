@@ -344,9 +344,9 @@ final class SquirrelInputController: IMKInputController {
 
 // MARK: - AsyncRimeProcessorDelegate
 extension SquirrelInputController: AsyncRimeProcessorDelegate {
-    func onRimeStateUpdated() {
-        // 在主线程更新UI
-        rimeUpdate()
+    func onRimeStateUpdated(hasInput: Bool) {
+        // 在主线程更新UI，传递输入状态
+        rimeUpdate(forceShowPanel: hasInput)
     }
 
     func onRimeCommitText(_ text: String) {
@@ -551,7 +551,7 @@ extension SquirrelInputController {
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    fileprivate func rimeUpdate() {
+    fileprivate func rimeUpdate(forceShowPanel: Bool = false) {
         // print("[DEBUG] rimeUpdate")
         rimeConsumeCommittedText()
 
@@ -699,7 +699,16 @@ extension SquirrelInputController {
                 page: page, lastPage: lastPage)
             _ = rimeAPI.free_context(&ctx)
         } else {
-            hidePalettes()
+            // 在异步模式下，如果有活跃输入则不隐藏面板
+            if let processor = asyncProcessor {
+                if !forceShowPanel && !processor.hasInput() {
+                    hidePalettes()
+                }
+                // 如果 forceShowPanel 为 true 或有输入内容，保持面板显示
+            } else {
+                // 同步模式下的原有逻辑
+                hidePalettes()
+            }
         }
     }
 
