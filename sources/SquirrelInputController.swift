@@ -340,6 +340,26 @@ final class SquirrelInputController: IMKInputController {
     deinit {
         destroySession()
     }
+
+    // MARK: - Public Methods for Panel
+    func getCurrentCandidates() -> [String] {
+        guard session != 0 else { return [] }
+
+        var ctx = RimeContext_stdbool.rimeStructInit()
+        guard rimeAPI.get_context(session, &ctx) else {
+            return []
+        }
+
+        let numCandidates = Int(ctx.menu.num_candidates)
+        var candidates = [String]()
+        for i in 0..<numCandidates {
+            let candidate = ctx.menu.candidates[i]
+            candidates.append(candidate.text.map { String(cString: $0) } ?? "")
+        }
+
+        rimeAPI.free_context(&ctx)
+        return candidates
+    }
 }
 
 // MARK: - AsyncRimeProcessorDelegate
@@ -553,7 +573,7 @@ extension SquirrelInputController {
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    fileprivate func rimeUpdate(forceShowPanel: Bool = false) {
+    func rimeUpdate(forceShowPanel: Bool = false) {
         // print("[DEBUG] rimeUpdate")
         rimeConsumeCommittedText()
 

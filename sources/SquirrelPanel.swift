@@ -19,6 +19,10 @@ final class SquirrelPanel: NSPanel {
   private var statusMessage: String = ""
   private var statusTimer: Timer?
 
+  // 候选词监控定时器相关
+  private var candidateMonitorTimer: Timer?
+  private var lastCandidatesHash: Int = 0
+
   private var preedit: String = ""
   private var selRange: NSRange = .empty
   private var caretPos: Int = 0
@@ -150,6 +154,7 @@ final class SquirrelPanel: NSPanel {
   func hide() {
     statusTimer?.invalidate()
     statusTimer = nil
+    stopCandidateMonitor()
     orderOut(nil)
     maxHeight = 0
   }
@@ -448,6 +453,10 @@ private extension SquirrelPanel {
     }
     alphaValue = theme.alpha
     invalidateShadow()
+
+    // 启动候选词监控定时器
+    startCandidateMonitor()
+
     orderFront(nil)
     // voila!
   }
@@ -472,5 +481,37 @@ private extension SquirrelPanel {
     let startPos = range.lowerBound.utf16Offset(in: string)
     let endPos = range.upperBound.utf16Offset(in: string)
     return NSRange(location: startPos, length: endPos - startPos)
+  }
+
+  // MARK: - Candidate Monitor Timer
+  func startCandidateMonitor() {
+    stopCandidateMonitor()
+    candidateMonitorTimer = Timer.scheduledTimer(
+      withTimeInterval: 0.15,
+      repeats: true
+    ) { [weak self] _ in
+      self?.onCandidateMonitorTimer()
+    }
+  }
+
+  func stopCandidateMonitor() {
+    candidateMonitorTimer?.invalidate()
+    candidateMonitorTimer = nil
+    lastCandidatesHash = 0
+  }
+
+  private func onCandidateMonitorTimer() {
+    guard let inputController = inputController else {
+      stopCandidateMonitor()
+      return
+    }
+
+    let currentCandidates = inputController.getCurrentCandidates()
+    let currentHash = currentCandidates.hashValue
+
+    if currentHash != lastCandidatesHash {
+      lastCandidatesHash = currentHash
+      inputController.rimeUpdate()
+    }
   }
 }
