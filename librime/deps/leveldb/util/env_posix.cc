@@ -4,10 +4,9 @@
 
 #include <dirent.h>
 #include <fcntl.h>
+#include <pthread.h>
 #include <sys/mman.h>
-#ifndef __Fuchsia__
 #include <sys/resource.h>
-#endif
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -73,14 +72,7 @@ Status PosixError(const std::string& context, int error_number) {
 class Limiter {
  public:
   // Limit maximum number of resources to |max_acquires|.
-  Limiter(int max_acquires)
-      :
-#if !defined(NDEBUG)
-        max_acquires_(max_acquires),
-#endif  // !defined(NDEBUG)
-        acquires_allowed_(max_acquires) {
-    assert(max_acquires >= 0);
-  }
+  Limiter(int max_acquires) : acquires_allowed_(max_acquires) {}
 
   Limiter(const Limiter&) = delete;
   Limiter operator=(const Limiter&) = delete;
@@ -93,35 +85,15 @@ class Limiter {
 
     if (old_acquires_allowed > 0) return true;
 
-    int pre_increment_acquires_allowed =
-        acquires_allowed_.fetch_add(1, std::memory_order_relaxed);
-
-    // Silence compiler warnings about unused arguments when NDEBUG is defined.
-    (void)pre_increment_acquires_allowed;
-    // If the check below fails, Release() was called more times than acquire.
-    assert(pre_increment_acquires_allowed < max_acquires_);
-
+    acquires_allowed_.fetch_add(1, std::memory_order_relaxed);
     return false;
   }
 
   // Release a resource acquired by a previous call to Acquire() that returned
   // true.
-  void Release() {
-    int old_acquires_allowed =
-        acquires_allowed_.fetch_add(1, std::memory_order_relaxed);
-
-    // Silence compiler warnings about unused arguments when NDEBUG is defined.
-    (void)old_acquires_allowed;
-    // If the check below fails, Release() was called more times than acquire.
-    assert(old_acquires_allowed < max_acquires_);
-  }
+  void Release() { acquires_allowed_.fetch_add(1, std::memory_order_relaxed); }
 
  private:
-#if !defined(NDEBUG)
-  // Catches an excessive number of Release() calls.
-  const int max_acquires_;
-#endif  // !defined(NDEBUG)
-
   // The number of available resources.
   //
   // This is a counter and is not tied to the invariants of any other class, so
@@ -136,7 +108,7 @@ class Limiter {
 class PosixSequentialFile final : public SequentialFile {
  public:
   PosixSequentialFile(std::string filename, int fd)
-      : fd_(fd), filename_(std::move(filename)) {}
+      : fd_(fd), filename_(filename) {}
   ~PosixSequentialFile() override { close(fd_); }
 
   Status Read(size_t n, Slice* result, char* scratch) override {
@@ -242,7 +214,7 @@ class PosixMmapReadableFile final : public RandomAccessFile {
   // over the ownership of the region.
   //
   // |mmap_limiter| must outlive this instance. The caller must have already
-  // acquired the right to use one mmap region, which will be released when this
+  // aquired the right to use one mmap region, which will be released when this
   // instance is destroyed.
   PosixMmapReadableFile(std::string filename, char* mmap_base, size_t length,
                         Limiter* mmap_limiter)
@@ -756,7 +728,7 @@ class PosixEnv : public Env {
   // Instances are constructed on the thread calling Schedule() and used on the
   // background thread.
   //
-  // This structure is thread-safe because it is immutable.
+  // This structure is thread-safe beacuse it is immutable.
   struct BackgroundWorkItem {
     explicit BackgroundWorkItem(void (*function)(void* arg), void* arg)
         : function(function), arg(arg) {}
@@ -785,10 +757,6 @@ int MaxOpenFiles() {
   if (g_open_read_only_file_limit >= 0) {
     return g_open_read_only_file_limit;
   }
-#ifdef __Fuchsia__
-  // Fuchsia doesn't implement getrlimit.
-  g_open_read_only_file_limit = 50;
-#else
   struct ::rlimit rlim;
   if (::getrlimit(RLIMIT_NOFILE, &rlim)) {
     // getrlimit failed, fallback to hard-coded default.
@@ -799,7 +767,6 @@ int MaxOpenFiles() {
     // Allow use of 20% of available file descriptors for read-only files.
     g_open_read_only_file_limit = rlim.rlim_cur / 5;
   }
-#endif
   return g_open_read_only_file_limit;
 }
 
@@ -870,17 +837,13 @@ class SingletonEnv {
  public:
   SingletonEnv() {
 #if !defined(NDEBUG)
-    env_initialized_.store(true, std::memory_order_relaxed);
+    env_initialized_.store(true, std::memory_order::memory_order_relaxed);
 #endif  // !defined(NDEBUG)
     static_assert(sizeof(env_storage_) >= sizeof(EnvType),
                   "env_storage_ will not fit the Env");
-    static_assert(std::is_standard_layout_v<SingletonEnv<EnvType>>);
-    static_assert(
-        offsetof(SingletonEnv<EnvType>, env_storage_) % alignof(EnvType) == 0,
-        "env_storage_ does not meet the Env's alignment needs");
-    static_assert(alignof(SingletonEnv<EnvType>) % alignof(EnvType) == 0,
+    static_assert(alignof(decltype(env_storage_)) >= alignof(EnvType),
                   "env_storage_ does not meet the Env's alignment needs");
-    new (env_storage_) EnvType();
+    new (&env_storage_) EnvType();
   }
   ~SingletonEnv() = default;
 
@@ -891,12 +854,13 @@ class SingletonEnv {
 
   static void AssertEnvNotInitialized() {
 #if !defined(NDEBUG)
-    assert(!env_initialized_.load(std::memory_order_relaxed));
+    assert(!env_initialized_.load(std::memory_order::memory_order_relaxed));
 #endif  // !defined(NDEBUG)
   }
 
  private:
-  alignas(EnvType) char env_storage_[sizeof(EnvType)];
+  typename std::aligned_storage<sizeof(EnvType), alignof(EnvType)>::type
+      env_storage_;
 #if !defined(NDEBUG)
   static std::atomic<bool> env_initialized_;
 #endif  // !defined(NDEBUG)

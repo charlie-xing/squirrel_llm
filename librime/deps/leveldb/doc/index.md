@@ -369,7 +369,6 @@ leveldb::Iterator* it = db->NewIterator(options);
 for (it->SeekToFirst(); it->Valid(); it->Next()) {
   ...
 }
-delete it;
 ```
 
 ### Key Layout
@@ -425,21 +424,21 @@ spaces. For example:
 ```c++
 class CustomFilterPolicy : public leveldb::FilterPolicy {
  private:
-  leveldb::FilterPolicy* builtin_policy_;
+  FilterPolicy* builtin_policy_;
 
  public:
-  CustomFilterPolicy() : builtin_policy_(leveldb::NewBloomFilterPolicy(10)) {}
+  CustomFilterPolicy() : builtin_policy_(NewBloomFilterPolicy(10)) {}
   ~CustomFilterPolicy() { delete builtin_policy_; }
 
   const char* Name() const { return "IgnoreTrailingSpacesFilter"; }
 
-  void CreateFilter(const leveldb::Slice* keys, int n, std::string* dst) const {
+  void CreateFilter(const Slice* keys, int n, std::string* dst) const {
     // Use builtin bloom filter code after removing trailing spaces
-    std::vector<leveldb::Slice> trimmed(n);
+    std::vector<Slice> trimmed(n);
     for (int i = 0; i < n; i++) {
       trimmed[i] = RemoveTrailingSpaces(keys[i]);
     }
-    builtin_policy_->CreateFilter(trimmed.data(), n, dst);
+    return builtin_policy_->CreateFilter(trimmed.data(), n, dst);
   }
 };
 ```

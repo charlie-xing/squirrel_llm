@@ -5,7 +5,6 @@
 #include "table/format.h"
 
 #include "leveldb/env.h"
-#include "leveldb/options.h"
 #include "port/port.h"
 #include "table/block.h"
 #include "util/coding.h"
@@ -41,10 +40,6 @@ void Footer::EncodeTo(std::string* dst) const {
 }
 
 Status Footer::DecodeFrom(Slice* input) {
-  if (input->size() < kEncodedLength) {
-    return Status::Corruption("not an sstable (footer too short)");
-  }
-
   const char* magic_ptr = input->data() + kEncodedLength - 8;
   const uint32_t magic_lo = DecodeFixed32(magic_ptr);
   const uint32_t magic_hi = DecodeFixed32(magic_ptr + 4);
@@ -121,31 +116,13 @@ Status ReadBlock(RandomAccessFile* file, const ReadOptions& options,
       size_t ulength = 0;
       if (!port::Snappy_GetUncompressedLength(data, n, &ulength)) {
         delete[] buf;
-        return Status::Corruption("corrupted snappy compressed block length");
+        return Status::Corruption("corrupted compressed block contents");
       }
       char* ubuf = new char[ulength];
       if (!port::Snappy_Uncompress(data, n, ubuf)) {
         delete[] buf;
         delete[] ubuf;
-        return Status::Corruption("corrupted snappy compressed block contents");
-      }
-      delete[] buf;
-      result->data = Slice(ubuf, ulength);
-      result->heap_allocated = true;
-      result->cachable = true;
-      break;
-    }
-    case kZstdCompression: {
-      size_t ulength = 0;
-      if (!port::Zstd_GetUncompressedLength(data, n, &ulength)) {
-        delete[] buf;
-        return Status::Corruption("corrupted zstd compressed block length");
-      }
-      char* ubuf = new char[ulength];
-      if (!port::Zstd_Uncompress(data, n, ubuf)) {
-        delete[] buf;
-        delete[] ubuf;
-        return Status::Corruption("corrupted zstd compressed block contents");
+        return Status::Corruption("corrupted compressed block contents");
       }
       delete[] buf;
       result->data = Slice(ubuf, ulength);

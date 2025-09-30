@@ -1,31 +1,36 @@
-# How to Contribute
+# Contributing
 
-We'd love to accept your patches and contributions to this project. There are
-just a few small guidelines you need to follow.
+We'd love to accept your code patches! However, before we can take them, we
+have to jump a couple of legal hurdles.
 
-## Contributor License Agreement
+## Contributor License Agreements
 
-Contributions to this project must be accompanied by a Contributor License
-Agreement. You (or your employer) retain the copyright to your contribution;
-this simply gives us permission to use and redistribute your contributions as
-part of the project. Head over to <https://cla.developers.google.com/> to see
-your current agreements on file or to sign a new one.
+Please fill out either the individual or corporate Contributor License
+Agreement as appropriate.
 
-You generally only need to submit a CLA once, so if you've already submitted one
-(even if it was for a different project), you probably don't need to do it
-again.
+* If you are an individual writing original source code and you're sure you
+own the intellectual property, then sign an [individual CLA](https://developers.google.com/open-source/cla/individual).
+* If you work for a company that wants to allow you to contribute your work,
+then sign a [corporate CLA](https://developers.google.com/open-source/cla/corporate).
 
-## Code Reviews
+Follow either of the two links above to access the appropriate CLA and
+instructions for how to sign and return it.
 
-All submissions, including submissions by project members, require review. We
-use GitHub pull requests for this purpose. Consult
-[GitHub Help](https://help.github.com/articles/about-pull-requests/) for more
-information on using pull requests.
+## Submitting a Patch
 
-See [the README](README.md#contributing-to-the-leveldb-project) for areas
-where we are likely to accept external contributions.
+1. Sign the contributors license agreement above.
+2. Decide which code you want to submit. A submission should be a set of changes
+that addresses one issue in the [issue tracker](https://github.com/google/leveldb/issues).
+Please don't mix more than one logical change per submission, because it makes
+the history hard to follow. If you want to make a change
+(e.g. add a sample or feature) that doesn't have a corresponding issue in the
+issue tracker, please create one.
+3. **Submitting**: When you are ready to submit, send us a Pull Request. Be
+sure to include the issue number you fixed and the name you used to sign
+the CLA.
 
-## Community Guidelines
+## Writing Code ##
 
-This project follows [Google's Open Source Community
-Guidelines](https://opensource.google/conduct/).
+If your contribution contains code, please make sure that it follows
+[the style guide](https://google.github.io/styleguide/cppguide.html).
+Otherwise we will have to ask you to make changes, and that's no fun for anyone.
