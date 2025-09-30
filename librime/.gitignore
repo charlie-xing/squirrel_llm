@@ -2,8 +2,6 @@ build/
 build-static/
 debug/
 dist/
-data/*
-include/*
 lib/*
 bin/*
 share/*
