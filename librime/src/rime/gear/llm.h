@@ -67,6 +67,7 @@ class LlmTranslator : public Translator {
   std::condition_variable worker_cv_;
   string request_text_;
   bool shutdown_ = false;
+  int firstLlm_ =0;
 };
 
 class LlmCpp {

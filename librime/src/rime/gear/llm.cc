@@ -19,6 +19,7 @@
 #include <rime/gear/llm.h>
 #include <iostream>
 #include "rime/processor.h"
+#include "rime_api.h"
 #include <rime/llmchain.h>
 
 namespace rime {
@@ -107,6 +108,7 @@ ProcessResult Llm::ProcessKeyEvent(const KeyEvent& key_event) {
     lastResult = "";
     lastProcessedPrompt_ = "";
     worker_thread_ = std::thread(&LlmTranslator::WorkerLoop, this);
+    firstLlm_=0;
   }
 
   LlmTranslator::~LlmTranslator() {
@@ -118,6 +120,7 @@ ProcessResult Llm::ProcessKeyEvent(const KeyEvent& key_event) {
     if (worker_thread_.joinable()) {
       worker_thread_.join();
     }
+    firstLlm_=0;
   }
 
   void LlmTranslator::WorkerLoop() {
@@ -136,6 +139,10 @@ ProcessResult Llm::ProcessKeyEvent(const KeyEvent& key_event) {
         while(true) {
           // Wait for 500ms. If we time out, break and process.
           // If we get notified with a new request, consume it and restart the timer.
+          if (firstLlm_ == 1){
+              break;
+          }
+
           if (worker_cv_.wait_for(lock, std::chrono::milliseconds(500)) == std::cv_status::timeout) {
             break; // Inactivity detected, proceed to process.
           }
@@ -222,6 +229,12 @@ ProcessResult Llm::ProcessKeyEvent(const KeyEvent& key_event) {
 
     // 核心判断：只有达到最小长度阈值才处理
     if (len >= config_.llm_start_num_ * 4) {
+      if (len == config_.llm_start_num_ * 4 ){
+          firstLlm_ = 1;
+      }else{
+          firstLlm_ = 0;
+      }
+
       prompt.erase(std::remove(prompt.begin(), prompt.end(), ' '), prompt.end());
 
       // If the core prompt hasn't changed, or is now empty, do nothing.

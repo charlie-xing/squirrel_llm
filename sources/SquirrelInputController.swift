@@ -101,7 +101,13 @@ final class SquirrelInputController: IMKInputController {
             rimeUpdate()
 
         case .keyDown:
-            // ignore Command+X hotkeys.
+            // Handle Command+I for context insertion
+            if modifiers.contains(.command) && event.keyCode == kVK_ANSI_I {
+                handled = handleContextInsertionShortcut()
+                break
+            }
+
+            // ignore other Command+X hotkeys.
             if modifiers.contains(.command) {
                 break
             }
@@ -789,5 +795,126 @@ extension SquirrelInputController {
                 comments: comments, labels: labels,
                 highlighted: highlighted, page: page, lastPage: lastPage, update: true)
         }
+    }
+}
+
+// MARK: - Context Insertion (Command+I)
+extension SquirrelInputController {
+    /// 处理 Command+I 快捷键，插入应用程序名称和上下文信息
+    fileprivate func handleContextInsertionShortcut() -> Bool {
+        // 获取应用程序名称
+        let appName = getActiveApplicationName()
+
+        // 获取光标上方最多 3 行文本
+        let contextText = getContextText(lines: 3)
+
+        // 格式化并插入
+        let insertionText = formatContextInsertion(app: appName, context: contextText)
+        commit(string: insertionText)
+
+        return true
+    }
+
+    /// 获取当前活跃应用程序的名称
+    fileprivate func getActiveApplicationName() -> String {
+        // 优先使用 Bundle Identifier
+        if let bundleId = client?.bundleIdentifier(), !bundleId.isEmpty {
+            // 尝试从 Bundle ID 提取应用名称
+            // 例如: com.apple.TextEdit -> TextEdit
+            let components = bundleId.split(separator: ".")
+            if let appName = components.last {
+                return String(appName)
+            }
+            return bundleId
+        }
+
+        // 如果无法获取，使用当前存储的 currentApp
+        if !currentApp.isEmpty {
+            let components = currentApp.split(separator: ".")
+            if let appName = components.last {
+                return String(appName)
+            }
+            return currentApp
+        }
+
+        return "Unknown App"
+    }
+
+    /// 通过 IMKTextInput 协议获取光标上方的文本内容
+    /// - Parameter lines: 需要获取的行数（默认 3 行）
+    /// - Returns: 获取到的文本，失败返回 nil
+    fileprivate func getContextText(lines: Int) -> String? {
+        guard let client = client else { return nil }
+
+        // 获取当前光标位置
+        let selectedRange = client.selectedRange()
+        let cursorPosition = selectedRange.location
+
+        // 如果光标在文档开头，无法获取上下文
+        if cursorPosition <= 0 {
+            return nil
+        }
+
+        // 尝试向前读取最多 500 个字符（足够包含 3 行文本）
+        let maxReadLength = 500
+        let startPos = max(0, cursorPosition - maxReadLength)
+        let readLength = cursorPosition - startPos
+
+        if readLength <= 0 {
+            return nil
+        }
+
+        let range = NSRange(location: startPos, length: readLength)
+
+        // 尝试获取文本
+        guard let attrString = client.attributedSubstring(from: range) else {
+            return nil
+        }
+
+        let text = attrString.string
+
+        // 从文本中提取最后 N 行
+        return extractLastNLines(from: text, count: lines)
+    }
+
+    /// 从文本中提取最后 N 行
+    /// - Parameters:
+    ///   - text: 源文本
+    ///   - count: 需要提取的行数
+    /// - Returns: 提取的文本
+    fileprivate func extractLastNLines(from text: String, count: Int) -> String {
+        if text.isEmpty {
+            return ""
+        }
+
+        // 按换行符分割文本
+        let lines = text.components(separatedBy: .newlines)
+
+        // 获取最后 N 行（去除空行）
+        let nonEmptyLines = lines.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+
+        if nonEmptyLines.isEmpty {
+            return ""
+        }
+
+        // 取最后 N 行
+        let lastNLines = nonEmptyLines.suffix(count)
+
+        return lastNLines.joined(separator: "\n")
+    }
+
+    /// 格式化上下文插入的文本
+    /// - Parameters:
+    ///   - app: 应用程序名称
+    ///   - context: 上下文文本（可选）
+    /// - Returns: 格式化后的文本
+    fileprivate func formatContextInsertion(app: String, context: String?) -> String {
+        var result = "[App: \(app)]"
+
+        if let context = context, !context.isEmpty {
+            result += "\n" + context
+        }
+
+        return result
     }
 }
