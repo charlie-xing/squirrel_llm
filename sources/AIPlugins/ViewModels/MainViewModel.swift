@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 
 @MainActor
 class MainViewModel: ObservableObject {
@@ -34,13 +34,15 @@ class MainViewModel: ObservableObject {
             filtered = allPlugins
         } else {
             filtered = allPlugins.filter { plugin in
-                plugin.name.localizedCaseInsensitiveContains(searchText) ||
-                plugin.description.localizedCaseInsensitiveContains(searchText)
+                plugin.name.localizedCaseInsensitiveContains(searchText)
+                    || plugin.description.localizedCaseInsensitiveContains(searchText)
             }
         }
 
         // Sort alphabetically by name
-        return filtered.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        return filtered.sorted {
+            $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+        }
     }
 
     func loadPlugins() {
@@ -104,7 +106,8 @@ class MainViewModel: ObservableObject {
         pluginWatchTimer?.invalidate()
 
         // 创建新的定时器
-        pluginWatchTimer = Timer.scheduledTimer(withTimeInterval: watchInterval, repeats: true) { [weak self] _ in
+        pluginWatchTimer = Timer.scheduledTimer(withTimeInterval: watchInterval, repeats: true) {
+            [weak self] _ in
             Task { @MainActor in
                 await self?.checkPluginChanges()
             }
@@ -169,7 +172,9 @@ class MainViewModel: ObservableObject {
     }
 
     deinit {
-        stopPluginWatcher()
+        Task { @MainActor in
+            self.stopPluginWatcher()
+        }
     }
 
     func updateFilteredPlugins() {
@@ -179,7 +184,9 @@ class MainViewModel: ObservableObject {
     /// Opens a new tab for the given plugin
     func openTab(for plugin: Plugin) {
         print("--- MainViewModel: openTab called for plugin: \(plugin.name) ---")
-        print("Before change: openTabs count = \(openTabs.count), activeTabId = \(activeTabId?.uuidString ?? "nil")")
+        print(
+            "Before change: openTabs count = \(openTabs.count), activeTabId = \(activeTabId?.uuidString ?? "nil")"
+        )
 
         // Check if tab already exists
         if let existingTab = openTabs.first(where: { $0.plugin.id == plugin.id }) {
@@ -195,12 +202,16 @@ class MainViewModel: ObservableObject {
 
         // Update window title
         WindowTitleManager.shared.setPluginTitle(plugin.name)
-        print("After change: openTabs count = \(openTabs.count), activeTabId = \(activeTabId?.uuidString ?? "nil")")
+        print(
+            "After change: openTabs count = \(openTabs.count), activeTabId = \(activeTabId?.uuidString ?? "nil")"
+        )
         print("----------------------------------------------------")
     }
 
     /// 打开带会话的新标签
-    func openPluginInNewTab(_ plugin: Plugin, session: ConversationSession, historyManager: HistoryManager) {
+    func openPluginInNewTab(
+        _ plugin: Plugin, session: ConversationSession, historyManager: HistoryManager
+    ) {
         // 创建新标签
         let newTab = TabItem(plugin: plugin, settings: settingsViewModel.settings)
         openTabs.append(newTab)
@@ -217,7 +228,9 @@ class MainViewModel: ObservableObject {
     /// Closes the tab with the given ID
     func closeTab(_ tabId: UUID, historyManager: HistoryManager? = nil) {
         print("--- MainViewModel: closeTab called for tabId: \(tabId.uuidString) ---")
-        print("Before close: openTabs count = \(openTabs.count), activeTabId = \(activeTabId?.uuidString ?? "nil")")
+        print(
+            "Before close: openTabs count = \(openTabs.count), activeTabId = \(activeTabId?.uuidString ?? "nil")"
+        )
 
         guard let index = openTabs.firstIndex(where: { $0.id == tabId }) else {
             print("MainViewModel: Tab not found with id: \(tabId.uuidString)")
@@ -273,9 +286,13 @@ class MainViewModel: ObservableObject {
                 WindowTitleManager.shared.setTitle(section: "plugins")
             }
         } else {
-            print("Closed tab was not active, keeping current active tab: \(activeTabId?.uuidString ?? "nil")")
+            print(
+                "Closed tab was not active, keeping current active tab: \(activeTabId?.uuidString ?? "nil")"
+            )
         }
-        print("After close: openTabs count = \(openTabs.count), activeTabId = \(activeTabId?.uuidString ?? "nil")")
+        print(
+            "After close: openTabs count = \(openTabs.count), activeTabId = \(activeTabId?.uuidString ?? "nil")"
+        )
         print("----------------------------------------------------")
     }
 }

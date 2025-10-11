@@ -33,6 +33,27 @@ class AppSettings: ObservableObject {
         loadInputMethodSettings()
         loadModels()
         loadUserInputStats()
+
+        // 监听输入统计更新通知
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleInputStatsUpdate(_:)),
+            name: .inputStatsDidUpdate,
+            object: nil
+        )
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    /// 处理输入统计更新通知
+    @objc private func handleInputStatsUpdate(_ notification: Notification) {
+        if let stats = notification.object as? UserInputStats {
+            DispatchQueue.main.async { [weak self] in
+                self?.userInputStats = stats
+            }
+        }
     }
 
     // MARK: - Persistence

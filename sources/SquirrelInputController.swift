@@ -482,7 +482,10 @@ extension SquirrelInputController {
     }
 
     fileprivate func processKey(_ rimeKeycode: UInt32, modifiers rimeModifiers: UInt32) -> Bool {
-        // TODO add special key event preprocessing here
+        // 检测空格键（用于统计）
+        if Int32(rimeKeycode) == XK_space && (rimeModifiers & kReleaseMask.rawValue) == 0 {
+            InputStatsManager.shared.markProcessingSpace()
+        }
 
         if let processor = asyncProcessor {
             // 异步模式：立即更新选项并异步处理按键
@@ -746,6 +749,10 @@ extension SquirrelInputController {
         client.insertText(string, replacementRange: .empty)
         preedit = ""
         hidePalettes()
+
+        // 记录输入统计
+        let isSpaceTriggered = InputStatsManager.shared.checkAndClearSpaceFlag()
+        InputStatsManager.shared.recordCommit(text: string, isSpaceTriggered: isSpaceTriggered)
     }
 
     fileprivate func show(preedit: String, selRange: NSRange, caretPos: Int) {
