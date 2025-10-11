@@ -62,14 +62,24 @@ class PluginViewModel: ObservableObject {
             self.isPluginLoaded = true
             self.currentPlugin = plugin
 
-            // Execute plugin after delay to ensure HTML and auto-init complete
-            // Auto-init in DOMContentLoaded needs time to load marked.js and highlight.js
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                self?.executePluginWithRAG(prompt: currentPrompt)
+            // Only execute plugin if there's a prompt to process
+            // If prompt is empty, let the JavaScript auto-initialization handle the initial UI
+            if !currentPrompt.isEmpty {
+                // Execute plugin after delay to ensure HTML and auto-init complete
+                // Auto-init in DOMContentLoaded needs time to load marked.js and highlight.js
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                    self?.executePluginWithRAG(prompt: currentPrompt)
+                }
+            } else {
+                print("PluginViewModel: Plugin loaded with empty prompt, skipping executePlugin (auto-init will handle UI)")
             }
         } else {
-            // Plugin already loaded, just execute with new prompt
-            executePluginWithRAG(prompt: currentPrompt)
+            // Plugin already loaded, only execute if there's a prompt
+            if !currentPrompt.isEmpty {
+                executePluginWithRAG(prompt: currentPrompt)
+            } else {
+                print("PluginViewModel: Plugin already loaded, empty prompt, no action needed")
+            }
         }
     }
 
@@ -208,6 +218,7 @@ class PluginViewModel: ObservableObject {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
             </head>
             <body>
+                <div id="plugin-container"></div>
                 <script type="text/javascript">
                 // Intercept console methods and forward to Swift
                 (function() {

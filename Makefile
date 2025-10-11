@@ -65,7 +65,7 @@ $(OPENCC_DATA):
 	$(MAKE) opencc-data
 
 plum-data:
-	$(MAKE) -C plum
+	no_update=1 $(MAKE) -C plum
 ifdef PLUM_TAG
 	rime_dir=plum/output bash plum/rime-install $(PLUM_TAG)
 endif

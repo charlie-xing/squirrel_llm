@@ -144,10 +144,18 @@
          */
         createContainer() {
             if (!this.container) {
-                this.container = document.createElement('div');
-                this.container.className = 'plugin-container';
-                this.container.id = `plugin-${this.context.pluginId}`;
-                document.body.appendChild(this.container);
+                // 首先尝试使用预先存在的容器
+                this.container = document.getElementById('plugin-container');
+                if (!this.container) {
+                    // 如果不存在，创建一个新的
+                    this.container = document.createElement('div');
+                    this.container.className = 'plugin-container';
+                    this.container.id = `plugin-${this.context.pluginId}`;
+                    document.body.appendChild(this.container);
+                } else {
+                    // 使用预先存在的容器，设置class
+                    this.container.className = 'plugin-container';
+                }
             }
             return this.container;
         }
