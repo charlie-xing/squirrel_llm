@@ -8,6 +8,7 @@
 import UserNotifications
 import Sparkle
 import AppKit
+import Carbon.HIToolbox
 
 final class SquirrelApplicationDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegate, UNUserNotificationCenterDelegate {
   static let rimeWikiURL = URL(string: "https://github.com/rime/home/wiki")!
@@ -19,6 +20,14 @@ final class SquirrelApplicationDelegate: NSObject, NSApplicationDelegate, SPUSta
   var panel: SquirrelPanel?
   var enableNotifications = false
   let updateController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+
+  // AI窗口管理器
+  private var aiPluginWindowManager: AIPluginWindowManager?
+
+  // 快捷键事件监听器
+  private var eventMonitor: Any?
+  private var hotKeyRef: EventHotKeyRef?
+  private var eventHandler: EventHandlerRef?
   var supportsGentleScheduledUpdateReminders: Bool {
     true
   }
@@ -55,9 +64,28 @@ final class SquirrelApplicationDelegate: NSObject, NSApplicationDelegate, SPUSta
   func applicationWillFinishLaunching(_ notification: Notification) {
     panel = SquirrelPanel(position: .zero)
     addObservers()
+
+    // 初始化 AI 插件窗口管理器
+    setupAIPluginWindow()
+
+    // 注册全局快捷键监听
+    setupGlobalHotkey()
   }
 
   func applicationWillTerminate(_ notification: Notification) {
+    // 清理事件监听器
+    if let monitor = eventMonitor {
+      NSEvent.removeMonitor(monitor)
+    }
+
+    // 清理 Carbon 热键
+    if let hotKeyRef = hotKeyRef {
+      UnregisterEventHotKey(hotKeyRef)
+    }
+    if let eventHandler = eventHandler {
+      RemoveEventHandler(eventHandler)
+    }
+
     // swiftlint:disable:next notification_center_detachment
     NotificationCenter.default.removeObserver(self)
     DistributedNotificationCenter.default().removeObserver(self)
@@ -323,4 +351,49 @@ extension NSApplication {
   var squirrelAppDelegate: SquirrelApplicationDelegate {
     self.delegate as! SquirrelApplicationDelegate
   }
+}
+
+// MARK: - AI Plugin Window Management
+extension SquirrelApplicationDelegate {
+  fileprivate func setupAIPluginWindow() {
+    aiPluginWindowManager = AIPluginWindowManager()
+  }
+
+  fileprivate func setupGlobalHotkey() {
+    // 使用 Carbon 注册全局热键 (Cmd+Shift+Space)
+    // 这种方式不需要辅助功能权限
+    let hotKeyID = EventHotKeyID(signature: OSType(0x41495047), id: 1) // 'AIPG' = AI Plugin
+
+    var eventType = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
+
+    // 注册事件处理器
+    let eventHandlerCallback: EventHandlerUPP = { (nextHandler, theEvent, userData) -> OSStatus in
+      guard let userData = userData else { return OSStatus(eventNotHandledErr) }
+      let delegate = Unmanaged<SquirrelApplicationDelegate>.fromOpaque(userData).takeUnretainedValue()
+
+      // 如果输入法正在处理输入,不响应快捷键
+      if delegate.panel?.isVisible == true {
+        return OSStatus(eventNotHandledErr)
+      }
+
+      // 切换 AI 插件窗口
+      DispatchQueue.main.async {
+        delegate.aiPluginWindowManager?.toggleWindow()
+      }
+
+      return noErr
+    }
+
+    let userData = Unmanaged.passUnretained(self).toOpaque()
+    InstallEventHandler(GetApplicationEventTarget(), eventHandlerCallback, 1, &eventType, userData, &eventHandler)
+
+    // 注册热键: Cmd(cmdKey) + Shift(shiftKey) + Space(49)
+    let modifiers = UInt32(cmdKey | shiftKey)
+    let keyCode = UInt32(kVK_Space) // 49 是 Space 键的 keyCode
+
+    RegisterEventHotKey(keyCode, modifiers, hotKeyID, GetApplicationEventTarget(), 0, &hotKeyRef)
+
+    print("Global hotkey registered: Cmd+Shift+Space")
+  }
+
 }

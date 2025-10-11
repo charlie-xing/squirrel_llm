@@ -1,0 +1,271 @@
+/* Main Navigation */
+"plugins" = "Plugins";
+"history" = "History";
+"settings" = "Settings";
+
+/* Theme */
+"light_mode" = "Light Mode";
+"dark_mode" = "Dark Mode";
+"switch_to_light" = "Switch to Light Mode";
+"switch_to_dark" = "Switch to Dark Mode";
+
+/* User Profile */
+"user_name" = "User Name";
+"change_avatar" = "Change Avatar";
+"guest" = "Guest";
+"adjust_avatar" = "Adjust Avatar";
+"cancel" = "Cancel";
+"confirm" = "Confirm";
+
+/* Input Area */
+"enter_prompt" = "Enter your prompt...";
+"send" = "Send";
+
+/* Plugin List */
+"select_plugin" = "Select a plugin to start";
+"no_plugins" = "No plugins found";
+"search_plugins" = "Search plugins...";
+"no_matching_plugins" = "No matching plugins";
+
+/* Plugin Modes */
+"mode_chat" = "Chat";
+"mode_bot" = "BOT";
+"mode_agent" = "Agent";
+"mode_role" = "Role";
+
+/* History */
+"no_history" = "No history yet";
+"clear_history" = "Clear History";
+
+/* Settings */
+"api_settings" = "API Settings";
+"general_settings" = "General Settings";
+"model" = "Model";
+"ai_provider" = "AI Service Provider";
+"input_method" = "Input Method";
+"model_selection" = "Model Selection";
+
+/* AI Provider Settings */
+"add_provider" = "Add AI Service Provider";
+"provider_name" = "Provider Name";
+"api_endpoint" = "API Endpoint";
+"api_key" = "API Key";
+"test_connection" = "Test Connection";
+"save" = "Save";
+"configured_providers" = "Configured Providers";
+"no_providers" = "No providers configured yet";
+"active" = "Active";
+"activate" = "Activate";
+"delete_provider" = "Delete provider";
+"connection_successful" = "Connection successful!";
+
+/* Model Selection */
+"current_provider" = "Current Provider";
+"refresh" = "Refresh";
+"available_models" = "Available Models";
+"no_models" = "No models available";
+"refresh_models_hint" = "Click 'Refresh' to fetch models from your provider";
+"no_active_provider" = "No Active Provider";
+"configure_provider_first" = "Please configure and activate an AI provider first";
+"selected" = "Selected";
+"models_count" = "models";
+
+/* Input Method Settings */
+"local_model" = "Local Model";
+"model_url" = "Model URL";
+"browse_file" = "Browse for model file";
+"model_path_hint" = "Path to your local language model file";
+"model_name" = "Model Name";
+"model_identifier" = "Identifier for the model";
+"input_parameters" = "Input Parameters";
+"input_interval" = "Input Interval";
+"interval_hint" = "Time delay between input method updates";
+"appearance" = "Appearance";
+"skin_theme" = "Skin Theme";
+"theme_hint" = "Choose the visual theme for input method interface";
+"reset_defaults" = "Reset to Defaults";
+"save_settings" = "Save Settings";
+
+/* Window Title */
+"title_separator" = "→";
+"close_tab" = "Close Tab";
+
+/* User Input Stats */
+"kpm" = "KPM";
+"typing_speed_tooltip" = "Average keystrokes per minute";
+"ai_acceptance_tooltip" = "AI suggestion acceptance rate";
+
+/* History */
+"yesterday" = "Yesterday";
+"days_ago" = "%d days ago";
+"delete_session" = "Delete";
+"messages" = "messages";
+
+/* Knowledge Base */
+"knowledge_base" = "Knowledge Base";
+"knowledge_base_settings" = "Knowledge Base Settings";
+"knowledge_base_description" = "Configure and manage your knowledge bases, supporting local folders, web crawling, and enterprise API";
+"add_knowledge_base" = "Add Knowledge Base";
+"configured_knowledge_bases" = "Configured Knowledge Bases";
+"knowledge_bases_count" = "knowledge bases";
+"no_knowledge_bases" = "No knowledge bases configured";
+"add_knowledge_base_hint" = "Click 'Add Knowledge Base' to configure your first knowledge base";
+"delete_knowledge_base" = "Delete Knowledge Base";
+"delete_knowledge_base_message" = "Are you sure you want to delete knowledge base";
+"configure" = "Configure";
+
+/* Knowledge Base Types */
+"local_folder_kb" = "Local Folder";
+"web_site_kb" = "Web Site";
+"enterprise_api_kb" = "Enterprise API";
+"local_folder_kb_desc" = "Index documents from local folders";
+"web_site_kb_desc" = "Crawl and index website content";
+"enterprise_api_kb_desc" = "Connect to enterprise knowledge base API";
+
+/* Knowledge Base Configuration */
+"basic_information" = "Basic Information";
+"knowledge_base_name" = "Knowledge Base Name";
+"enter_kb_name" = "Enter knowledge base name";
+"description_optional" = "Description (Optional)";
+"enter_kb_description" = "Enter knowledge base description";
+"knowledge_base_type" = "Knowledge Base Type";
+"configuration" = "Configuration";
+
+/* Local Folder Config */
+"folder_path" = "Folder Path";
+"select_folder" = "Select folder";
+"browse" = "Browse";
+"include_subfolders" = "Include Subfolders";
+"supported_extensions" = "Supported File Extensions";
+"extensions_placeholder" = "txt,md,pdf";
+"extensions_hint" = "Separate multiple extensions with commas, e.g.: txt,md,pdf";
+
+/* Web Site Config */
+"website_url" = "Website URL";
+"enter_website_url" = "Enter website URL";
+"crawl_depth" = "Crawl Depth";
+"crawl_depth_hint" = "Link depth from the starting page";
+"max_pages" = "Max Pages";
+"respect_robots_txt" = "Respect robots.txt";
+
+/* Enterprise API Config */
+"enter_api_endpoint" = "Enter API endpoint";
+"enter_api_key" = "Enter API key";
+"timeout_seconds" = "Timeout (seconds)";
+
+/* Knowledge Base Status */
+"current_status" = "Current Status";
+"status" = "Status";
+"vectors" = "vectors";
+"last_updated" = "Last updated";
+"enabled" = "Enabled";
+"edit_knowledge_base" = "Edit Knowledge Base";
+"save_changes" = "Save Changes";
+"select" = "Select";
+
+/* Knowledge Base Actions */
+"actions" = "Actions";
+"index_files" = "Index Files";
+"crawl_website" = "Crawl Website";
+"sync_data" = "Sync Data";
+"clear_data" = "Clear Data";
+"index_files_desc" = "Scan and index documents in folder";
+"crawl_website_desc" = "Crawl web pages and build index";
+"sync_data_desc" = "Sync latest data from enterprise API";
+"clear_data_desc" = "Delete all vectorized data";
+
+/* Knowledge Base Processing Status */
+"processing" = "Processing";
+"indexing_files" = "Indexing files...";
+"crawling_website" = "Crawling website...";
+"syncing_data" = "Syncing data...";
+
+/* Knowledge Base Status Values */
+"kb_status_ready" = "Ready";
+"kb_status_not_configured" = "Not Configured";
+"kb_status_needs_indexing" = "Needs Indexing";
+"kb_status_needs_crawling" = "Needs Crawling";
+"kb_status_needs_sync" = "Needs Sync";
+"kb_status_disabled" = "Disabled";
+"kb_status_processing" = "Processing";
+"kb_status_error" = "Error";
+
+/* Knowledge Base Processing */
+"scanning_folder" = "Scanning folder";
+"processing_files" = "Processing files";
+"completing_processing" = "Completing processing";
+"cancelled" = "Cancelled";
+"initializing_crawler" = "Initializing crawler";
+"checking_robots" = "Checking robots.txt";
+"connecting_to_api" = "Connecting to API";
+"fetching_document_count" = "Fetching document count";
+"syncing_documents" = "Syncing documents";
+
+/* Knowledge Base Service Manager */
+"starting_processing" = "Starting processing";
+"vectorizing_documents" = "Vectorizing documents";
+"processing_completed" = "Processing completed";
+"processing_cancelled" = "Processing cancelled";
+
+/* Embedding Service */
+"embedding_service" = "Embedding Service";
+"embedding_settings" = "Embedding Service Settings";
+"embedding_settings_description" = "Configure document vectorization service, supporting OpenAI, local models and other options";
+"embedding_provider" = "Embedding Provider";
+"api_configuration" = "API Configuration";
+"api_key_info" = "Enter your OpenAI API key to use the embedding service";
+"get_openai_key" = "Get OpenAI API Key";
+"connection_test" = "Connection Test";
+"selected_provider" = "Selected Provider";
+"vector_dimension" = "Vector Dimension";
+"api_key_status" = "API Key Status";
+"not_configured" = "Not Configured";
+"configured" = "Configured";
+"requires_api_key" = "Requires API Key";
+"connection_failed" = "Connection Failed";
+
+/* RAG Configuration */
+"rag_configuration" = "RAG Configuration";
+"rag_settings" = "RAG Settings";
+"rag_settings_description" = "Configure Retrieval-Augmented Generation for knowledge base integration";
+"enable_rag" = "Enable RAG";
+"enable_rag_description" = "Use knowledge base content to enhance AI responses";
+"search_settings" = "Search Settings";
+"search_settings_description" = "Configure how content is retrieved from knowledge bases";
+"maximum_results" = "Maximum Results";
+"maximum_results_description" = "Number of chunks to retrieve";
+"similarity_threshold" = "Similarity Threshold";
+"similarity_threshold_description" = "Minimum similarity score (0.0 - 1.0)";
+"context_settings" = "Context Settings";
+"context_settings_description" = "Configure how retrieved content is formatted and used";
+"maximum_context_length" = "Maximum Context Length";
+"maximum_context_length_description" = "Characters limit for context text";
+"include_metadata" = "Include Metadata";
+"include_metadata_description" = "Show similarity scores in context";
+"context_template" = "Context Template";
+"context_template_description" = "Template for formatting retrieved context. Use {context} and {query} placeholders.";
+"template_label" = "Template:";
+"available_placeholders" = "Available placeholders: {context}, {query}";
+"configuration_preview" = "Configuration Preview";
+"preview_description" = "Preview of current settings";
+"max_results" = "Max Results";
+"max_context_length" = "Max Context Length";
+"chars" = "chars";
+"yes" = "Yes";
+"no" = "No";
+"reset" = "Reset";
+"reset_configuration" = "Reset Configuration";
+"reset_confirmation_title" = "Reset Configuration";
+"reset_confirmation_message" = "This will reset all RAG configuration to default values. This action cannot be undone.";
+"reset_to_default" = "Reset to Default";
+"select_knowledge_base" = "Select knowledge base";
+"no_knowledge_base_selected" = "No knowledge base selected";
+"no_ready_knowledge_bases" = "No Ready Knowledge Bases";
+"create_configure_kb" = "Create and configure knowledge bases in Settings";
+"none" = "None";
+"documents" = "documents";
+"chunks" = "chunks";
+"excellent_match" = "Excellent match";
+"good_match" = "Good match";
+"fair_match" = "Fair match";
+"poor_match" = "Poor match";

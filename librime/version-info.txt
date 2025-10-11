@@ -1,0 +1,2 @@
+RIME_PLUGINS=
+librime 6efcd08

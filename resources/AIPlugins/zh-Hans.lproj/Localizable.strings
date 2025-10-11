@@ -1,0 +1,271 @@
+/* Main Navigation */
+"plugins" = "插件";
+"history" = "历史";
+"settings" = "设置";
+
+/* Theme */
+"light_mode" = "明亮模式";
+"dark_mode" = "暗黑模式";
+"switch_to_light" = "切换到明亮模式";
+"switch_to_dark" = "切换到暗黑模式";
+
+/* User Profile */
+"user_name" = "用户名";
+"change_avatar" = "更换头像";
+"guest" = "访客";
+"adjust_avatar" = "调整头像";
+"cancel" = "取消";
+"confirm" = "确认";
+
+/* Input Area */
+"enter_prompt" = "输入您的提示...";
+"send" = "发送";
+
+/* Plugin List */
+"select_plugin" = "选择一个插件开始";
+"no_plugins" = "未找到插件";
+"search_plugins" = "搜索插件...";
+"no_matching_plugins" = "没有匹配的插件";
+
+/* Plugin Modes */
+"mode_chat" = "对话";
+"mode_bot" = "机器人";
+"mode_agent" = "智能体";
+"mode_role" = "角色";
+
+/* History */
+"no_history" = "暂无历史记录";
+"clear_history" = "清空历史";
+
+/* Settings */
+"api_settings" = "API 设置";
+"general_settings" = "通用设置";
+"model" = "模型";
+"ai_provider" = "AI 服务提供商";
+"input_method" = "输入法";
+"model_selection" = "模型选择";
+
+/* AI Provider Settings */
+"add_provider" = "添加 AI 服务提供商";
+"provider_name" = "提供商名称";
+"api_endpoint" = "API 端点";
+"api_key" = "API 密钥";
+"test_connection" = "测试连接";
+"save" = "保存";
+"configured_providers" = "已配置的提供商";
+"no_providers" = "尚未配置提供商";
+"active" = "活跃";
+"activate" = "激活";
+"delete_provider" = "删除提供商";
+"connection_successful" = "连接成功！";
+
+/* Model Selection */
+"current_provider" = "当前提供商";
+"refresh" = "刷新";
+"available_models" = "可用模型";
+"no_models" = "没有可用模型";
+"refresh_models_hint" = "点击'刷新'从您的提供商获取模型";
+"no_active_provider" = "没有活跃的提供商";
+"configure_provider_first" = "请先配置并激活一个 AI 提供商";
+"selected" = "已选择";
+"models_count" = "个模型";
+
+/* Input Method Settings */
+"local_model" = "本地模型";
+"model_url" = "模型 URL";
+"browse_file" = "浏览模型文件";
+"model_path_hint" = "本地语言模型文件的路径";
+"model_name" = "模型名称";
+"model_identifier" = "模型标识符";
+"input_parameters" = "输入参数";
+"input_interval" = "输入间隔";
+"interval_hint" = "输入法更新之间的时间延迟";
+"appearance" = "外观";
+"skin_theme" = "皮肤主题";
+"theme_hint" = "选择输入法界面的视觉主题";
+"reset_defaults" = "恢复默认";
+"save_settings" = "保存设置";
+
+/* Window Title */
+"title_separator" = "→";
+"close_tab" = "关闭标签";
+
+/* User Input Stats */
+"kpm" = "按键/分";
+"typing_speed_tooltip" = "平均每分钟按键次数";
+"ai_acceptance_tooltip" = "AI候选词采用率";
+
+/* History */
+"yesterday" = "昨天";
+"days_ago" = "%d天前";
+"delete_session" = "删除";
+"messages" = "条消息";
+
+/* Knowledge Base */
+"knowledge_base" = "知识库";
+"knowledge_base_settings" = "知识库设置";
+"knowledge_base_description" = "配置和管理您的知识库，支持本地文件夹、网站爬虫和企业API三种类型";
+"add_knowledge_base" = "添加知识库";
+"configured_knowledge_bases" = "已配置的知识库";
+"knowledge_bases_count" = "个知识库";
+"no_knowledge_bases" = "暂无知识库";
+"add_knowledge_base_hint" = "点击'添加知识库'开始配置您的第一个知识库";
+"delete_knowledge_base" = "删除知识库";
+"delete_knowledge_base_message" = "确定要删除知识库";
+"configure" = "配置";
+
+/* Knowledge Base Types */
+"local_folder_kb" = "本地文件夹";
+"web_site_kb" = "网站爬虫";
+"enterprise_api_kb" = "企业API";
+"local_folder_kb_desc" = "索引本地文件夹中的文档";
+"web_site_kb_desc" = "爬取网站内容并索引";
+"enterprise_api_kb_desc" = "连接企业知识库API";
+
+/* Knowledge Base Configuration */
+"basic_information" = "基本信息";
+"knowledge_base_name" = "知识库名称";
+"enter_kb_name" = "请输入知识库名称";
+"description_optional" = "描述（可选）";
+"enter_kb_description" = "请输入知识库描述";
+"knowledge_base_type" = "知识库类型";
+"configuration" = "配置";
+
+/* Local Folder Config */
+"folder_path" = "文件夹路径";
+"select_folder" = "选择文件夹";
+"browse" = "浏览";
+"include_subfolders" = "包含子文件夹";
+"supported_extensions" = "支持的文件扩展名";
+"extensions_placeholder" = "txt,md,pdf";
+"extensions_hint" = "用逗号分隔多个扩展名，如：txt,md,pdf";
+
+/* Web Site Config */
+"website_url" = "网站地址";
+"enter_website_url" = "请输入网站地址";
+"crawl_depth" = "爬取深度";
+"crawl_depth_hint" = "从起始页面开始的链接深度";
+"max_pages" = "最大页面数";
+"respect_robots_txt" = "遵循robots.txt";
+
+/* Enterprise API Config */
+"enter_api_endpoint" = "请输入API端点";
+"enter_api_key" = "请输入API密钥";
+"timeout_seconds" = "超时时间（秒）";
+
+/* Knowledge Base Status */
+"current_status" = "当前状态";
+"status" = "状态";
+"vectors" = "向量";
+"last_updated" = "最后更新";
+"enabled" = "启用";
+"edit_knowledge_base" = "编辑知识库";
+"save_changes" = "保存更改";
+"select" = "选择";
+
+/* Knowledge Base Actions */
+"actions" = "操作";
+"index_files" = "索引文件";
+"crawl_website" = "爬取网站";
+"sync_data" = "同步数据";
+"clear_data" = "清空数据";
+"index_files_desc" = "扫描并索引文件夹中的文档";
+"crawl_website_desc" = "爬取网站页面并建立索引";
+"sync_data_desc" = "从企业API同步最新数据";
+"clear_data_desc" = "删除所有向量化数据";
+
+/* Knowledge Base Processing Status */
+"processing" = "处理中";
+"indexing_files" = "正在索引文件...";
+"crawling_website" = "正在爬取网站...";
+"syncing_data" = "正在同步数据...";
+
+/* Knowledge Base Status Values */
+"kb_status_ready" = "就绪";
+"kb_status_not_configured" = "未配置";
+"kb_status_needs_indexing" = "需要索引";
+"kb_status_needs_crawling" = "需要爬取";
+"kb_status_needs_sync" = "需要同步";
+"kb_status_disabled" = "已禁用";
+"kb_status_processing" = "处理中";
+"kb_status_error" = "错误";
+
+/* Knowledge Base Processing */
+"scanning_folder" = "正在扫描文件夹";
+"processing_files" = "正在处理文件";
+"completing_processing" = "正在完成处理";
+"cancelled" = "已取消";
+"initializing_crawler" = "正在初始化爬虫";
+"checking_robots" = "正在检查 robots.txt";
+"connecting_to_api" = "正在连接到 API";
+"fetching_document_count" = "正在获取文档数量";
+"syncing_documents" = "正在同步文档";
+
+/* Knowledge Base Service Manager */
+"starting_processing" = "开始处理";
+"vectorizing_documents" = "正在向量化文档";
+"processing_completed" = "处理完成";
+"processing_cancelled" = "处理已取消";
+
+/* Embedding Service */
+"embedding_service" = "向量服务";
+"embedding_settings" = "向量服务设置";
+"embedding_settings_description" = "配置文档向量化服务，支持OpenAI、本地模型等多种选择";
+"embedding_provider" = "向量化提供商";
+"api_configuration" = "API配置";
+"api_key_info" = "请输入您的OpenAI API密钥以使用向量化服务";
+"get_openai_key" = "获取OpenAI API密钥";
+"connection_test" = "连接测试";
+"selected_provider" = "当前提供商";
+"vector_dimension" = "向量维度";
+"api_key_status" = "API密钥状态";
+"not_configured" = "未配置";
+"configured" = "已配置";
+"requires_api_key" = "需要API密钥";
+"connection_failed" = "连接失败";
+
+/* RAG Configuration */
+"rag_configuration" = "RAG配置";
+"rag_settings" = "RAG设置";
+"rag_settings_description" = "配置检索增强生成以集成知识库";
+"enable_rag" = "启用RAG";
+"enable_rag_description" = "使用知识库内容增强AI回复";
+"search_settings" = "搜索设置";
+"search_settings_description" = "配置如何从知识库中检索内容";
+"maximum_results" = "最大结果数";
+"maximum_results_description" = "要检索的块数量";
+"similarity_threshold" = "相似度阈值";
+"similarity_threshold_description" = "最小相似度分数 (0.0 - 1.0)";
+"context_settings" = "上下文设置";
+"context_settings_description" = "配置检索内容的格式化和使用方式";
+"maximum_context_length" = "最大上下文长度";
+"maximum_context_length_description" = "上下文文本的字符限制";
+"include_metadata" = "包含元数据";
+"include_metadata_description" = "在上下文中显示相似度分数";
+"context_template" = "上下文模板";
+"context_template_description" = "格式化检索上下文的模板。使用 {context} 和 {query} 占位符。";
+"template_label" = "模板：";
+"available_placeholders" = "可用占位符：{context}, {query}";
+"configuration_preview" = "配置预览";
+"preview_description" = "当前设置的预览";
+"max_results" = "最大结果数";
+"max_context_length" = "最大上下文长度";
+"chars" = "字符";
+"yes" = "是";
+"no" = "否";
+"reset" = "重置";
+"reset_configuration" = "重置配置";
+"reset_confirmation_title" = "重置配置";
+"reset_confirmation_message" = "这将重置所有RAG配置为默认值。此操作无法撤销。";
+"reset_to_default" = "重置为默认";
+"select_knowledge_base" = "选择知识库";
+"no_knowledge_base_selected" = "未选择知识库";
+"no_ready_knowledge_bases" = "没有就绪的知识库";
+"create_configure_kb" = "在设置中创建和配置知识库";
+"none" = "无";
+"documents" = "文档";
+"chunks" = "块";
+"excellent_match" = "极佳匹配";
+"good_match" = "良好匹配";
+"fair_match" = "一般匹配";
+"poor_match" = "较差匹配";
