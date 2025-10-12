@@ -426,8 +426,26 @@ class CustomTextView: NSTextView {
         // Let standard editing shortcuts pass through to the responder chain
         if event.modifierFlags.contains(.command) {
             switch event.charactersIgnoringModifiers {
-            case "c", "v", "x", "a", "z": // Copy, Paste, Cut, Select All, Undo
-                return super.performKeyEquivalent(with: event)
+            case "c":  // Copy
+                if NSApp.sendAction(#selector(NSText.copy(_:)), to: nil, from: self) {
+                    return true
+                }
+            case "v":  // Paste
+                if NSApp.sendAction(#selector(NSText.paste(_:)), to: nil, from: self) {
+                    return true
+                }
+            case "x":  // Cut
+                if NSApp.sendAction(#selector(NSText.cut(_:)), to: nil, from: self) {
+                    return true
+                }
+            case "a":  // Select All
+                if NSApp.sendAction(#selector(NSText.selectAll(_:)), to: nil, from: self) {
+                    return true
+                }
+            case "z":  // Undo
+                if NSApp.sendAction(Selector(("undo:")), to: nil, from: self) {
+                    return true
+                }
             default:
                 break
             }
