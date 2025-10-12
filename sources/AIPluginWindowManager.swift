@@ -6,8 +6,8 @@
 //  管理 AI 插件窗口的显示和隐藏
 //
 
-import SwiftUI
 import AppKit
+import SwiftUI
 
 final class AIPluginWindowManager: NSObject {
     private var window: NSWindow?
@@ -29,13 +29,13 @@ final class AIPluginWindowManager: NSObject {
 
         // 创建窗口 - 设置默认尺寸
         window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 1200, height: 800),
+            contentRect: NSRect(x: 0, y: 0, width: 1150, height: 720),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )
 
-        window?.title = "AI Plugins"
+        window?.title = "AI plugin helper"
         window?.contentViewController = hostingController
         window?.minSize = NSSize(width: 900, height: 650)
 
@@ -114,7 +114,8 @@ final class AIPluginWindowManager: NSObject {
 
     private func restoreWindowFrame() {
         guard let frameString = UserDefaults.standard.string(forKey: windowFrameKey),
-              let window = window else {
+            let window = window
+        else {
             // 如果没有保存的位置，居中显示
             window?.center()
             return

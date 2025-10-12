@@ -31,9 +31,6 @@ final class SquirrelInputController: IMKInputController {
     private var chordDuration: TimeInterval = 0
     private var currentApp: String = ""
 
-    // 异步处理器
-    private var asyncProcessor: AsyncRimeProcessor?
-
     // swiftlint:disable:next cyclomatic_complexity
     override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
         guard let event = event else { return false }
@@ -143,72 +140,39 @@ final class SquirrelInputController: IMKInputController {
     }
 
     func selectCandidate(_ index: Int) -> Bool {
-        if let processor = asyncProcessor {
-            processor.selectCandidateAsync(index)
-            return true
-        } else {
-            // 回退到同步模式
-            let success = rimeAPI.select_candidate_on_current_page(session, index)
-            if success {
-                rimeUpdate()
-            }
-            return success
+        let success = rimeAPI.select_candidate_on_current_page(session, index)
+        if success {
+            rimeUpdate()
         }
+        return success
     }
 
     // swiftlint:disable:next identifier_name
     func page(up: Bool) -> Bool {
-        if let processor = asyncProcessor {
-            processor.changePageAsync(up: up)
-            return true
-        } else {
-            // 回退到同步模式
-            var handled = false
-            handled = rimeAPI.change_page(session, up)
-            if handled {
-                rimeUpdate()
-            }
-            return handled
+        let handled = rimeAPI.change_page(session, up)
+        if handled {
+            rimeUpdate()
         }
+        return handled
     }
 
     func moveCaret(forward: Bool) -> Bool {
-        if let processor = asyncProcessor {
-            let currentCaretPos = processor.getCaretPos()
-            guard let input = processor.getInput() else { return false }
-            let newCaretPos: Int
-            if forward {
-                if currentCaretPos <= 0 {
-                    return false
-                }
-                newCaretPos = currentCaretPos - 1
-            } else {
-                if currentCaretPos >= input.utf8.count {
-                    return false
-                }
-                newCaretPos = currentCaretPos + 1
+        let currentCaretPos = rimeAPI.get_caret_pos(session)
+        guard let input = rimeAPI.get_input(session) else { return false }
+        if forward {
+            if currentCaretPos <= 0 {
+                return false
             }
-            processor.setCaretPosAsync(newCaretPos)
-            return true
+            rimeAPI.set_caret_pos(session, currentCaretPos - 1)
         } else {
-            // 回退到同步模式
-            let currentCaretPos = rimeAPI.get_caret_pos(session)
-            guard let input = rimeAPI.get_input(session) else { return false }
-            if forward {
-                if currentCaretPos <= 0 {
-                    return false
-                }
-                rimeAPI.set_caret_pos(session, currentCaretPos - 1)
-            } else {
-                let inputStr = String(cString: input)
-                if currentCaretPos >= inputStr.utf8.count {
-                    return false
-                }
-                rimeAPI.set_caret_pos(session, currentCaretPos + 1)
+            let inputStr = String(cString: input)
+            if currentCaretPos >= inputStr.utf8.count {
+                return false
             }
-            rimeUpdate()
-            return true
+            rimeAPI.set_caret_pos(session, currentCaretPos + 1)
         }
+        rimeUpdate()
+        return true
     }
 
     override func recognizedEvents(_ sender: Any!) -> Int {
@@ -267,16 +231,9 @@ final class SquirrelInputController: IMKInputController {
         // print("[DEBUG] commitComposition: \(sender ?? "nil")")
         //  commit raw input
         if session != 0 {
-            if let processor = asyncProcessor {
-                if let input = processor.getInput() {
-                    commit(string: input)
-                    processor.clearComposition()
-                }
-            } else {
-                if let input = rimeAPI.get_input(session) {
-                    commit(string: String(cString: input))
-                    rimeAPI.clear_composition(session)
-                }
+            if let input = rimeAPI.get_input(session) {
+                commit(string: String(cString: input))
+                rimeAPI.clear_composition(session)
             }
         }
     }
@@ -368,19 +325,6 @@ final class SquirrelInputController: IMKInputController {
     }
 }
 
-// MARK: - AsyncRimeProcessorDelegate
-extension SquirrelInputController: AsyncRimeProcessorDelegate {
-    func onRimeStateUpdated(hasInput: Bool) {
-        // 在主线程更新UI，传递输入状态
-        rimeUpdate(forceShowPanel: hasInput)
-    }
-
-    func onRimeCommitText(_ text: String) {
-        // 在主线程提交文本
-        commit(string: text)
-    }
-}
-
 extension SquirrelInputController {
 
     fileprivate func onChordTimer(_: Timer) {
@@ -453,10 +397,6 @@ extension SquirrelInputController {
 
         if session != 0 {
             updateAppOptions()
-            // 初始化异步处理器
-            //asyncProcessor = AsyncRimeProcessor(rimeAPI: rimeAPI, session: session, delegate: self)
-            //用同步处理，在panel上加定时器来更新内容
-            asyncProcessor = nil
         }
     }
 
@@ -487,88 +427,52 @@ extension SquirrelInputController {
             InputStatsManager.shared.markProcessingSpace()
         }
 
-        if let processor = asyncProcessor {
-            // 异步模式：立即更新选项并异步处理按键
-            if let panel = NSApp.squirrelAppDelegate.panel {
-                if panel.linear != processor.getOption("_linear") {
-                    processor.setOption("_linear", value: panel.linear)
-                }
-                if panel.vertical != processor.getOption("_vertical") {
-                    processor.setOption("_vertical", value: panel.vertical)
-                }
+        // with linear candidate list, arrow keys may behave differently.
+        if let panel = NSApp.squirrelAppDelegate.panel {
+            if panel.linear != rimeAPI.get_option(session, "_linear") {
+                rimeAPI.set_option(session, "_linear", panel.linear)
             }
-
-            // 异步处理按键
-            let handled = processor.processKeyAsync(rimeKeycode, modifiers: rimeModifiers)
-
-            // TODO add special key event postprocessing here
-            if handled {
-                let isChordingKey =
-                    switch Int32(rimeKeycode) {
-                    case XK_space...XK_asciitilde, XK_Control_L, XK_Control_R, XK_Alt_L, XK_Alt_R,
-                        XK_Shift_L, XK_Shift_R:
-                        true
-                    default:
-                        false
-                    }
-                if isChordingKey && processor.getOption("_chord_typing") {
-                    updateChord(keycode: rimeKeycode, modifiers: rimeModifiers)
-                } else if (rimeModifiers & kReleaseMask.rawValue) == 0 {
-                    // non-chording key pressed
-                    clearChord()
-                }
+            // with vertical text, arrow keys may behave differently.
+            if panel.vertical != rimeAPI.get_option(session, "_vertical") {
+                rimeAPI.set_option(session, "_vertical", panel.vertical)
             }
-
-            return handled
-        } else {
-            // 回退到同步模式
-            // with linear candidate list, arrow keys may behave differently.
-            if let panel = NSApp.squirrelAppDelegate.panel {
-                if panel.linear != rimeAPI.get_option(session, "_linear") {
-                    rimeAPI.set_option(session, "_linear", panel.linear)
-                }
-                // with vertical text, arrow keys may behave differently.
-                if panel.vertical != rimeAPI.get_option(session, "_vertical") {
-                    rimeAPI.set_option(session, "_vertical", panel.vertical)
-                }
-            }
-
-            let handled = rimeAPI.process_key(session, Int32(rimeKeycode), Int32(rimeModifiers))
-            // print("[DEBUG] rime_keycode: \(rimeKeycode), rime_modifiers: \(rimeModifiers), handled = \(handled)")
-
-            // TODO add special key event postprocessing here
-
-            if !handled {
-                let isVimBackInCommandMode =
-                    rimeKeycode == XK_Escape
-                    || ((rimeModifiers & kControlMask.rawValue != 0)
-                        && (rimeKeycode == XK_c || rimeKeycode == XK_C
-                            || rimeKeycode == XK_bracketleft))
-                if isVimBackInCommandMode && rimeAPI.get_option(session, "vim_mode")
-                    && !rimeAPI.get_option(session, "ascii_mode")
-                {
-                    rimeAPI.set_option(session, "ascii_mode", true)
-                    // print("[DEBUG] turned Chinese mode off in vim-like editor's command mode")
-                }
-            } else {
-                let isChordingKey =
-                    switch Int32(rimeKeycode) {
-                    case XK_space...XK_asciitilde, XK_Control_L, XK_Control_R, XK_Alt_L, XK_Alt_R,
-                        XK_Shift_L, XK_Shift_R:
-                        true
-                    default:
-                        false
-                    }
-                if isChordingKey && rimeAPI.get_option(session, "_chord_typing") {
-                    updateChord(keycode: rimeKeycode, modifiers: rimeModifiers)
-                } else if (rimeModifiers & kReleaseMask.rawValue) == 0 {
-                    // non-chording key pressed
-                    clearChord()
-                }
-            }
-
-            return handled
         }
+
+        let handled = rimeAPI.process_key(session, Int32(rimeKeycode), Int32(rimeModifiers))
+        // print("[DEBUG] rime_keycode: \(rimeKeycode), rime_modifiers: \(rimeModifiers), handled = \(handled)")
+
+        // TODO add special key event postprocessing here
+
+        if !handled {
+            let isVimBackInCommandMode =
+                rimeKeycode == XK_Escape
+                || ((rimeModifiers & kControlMask.rawValue != 0)
+                    && (rimeKeycode == XK_c || rimeKeycode == XK_C
+                        || rimeKeycode == XK_bracketleft))
+            if isVimBackInCommandMode && rimeAPI.get_option(session, "vim_mode")
+                && !rimeAPI.get_option(session, "ascii_mode")
+            {
+                rimeAPI.set_option(session, "ascii_mode", true)
+                // print("[DEBUG] turned Chinese mode off in vim-like editor's command mode")
+            }
+        } else {
+            let isChordingKey =
+                switch Int32(rimeKeycode) {
+                case XK_space...XK_asciitilde, XK_Control_L, XK_Control_R, XK_Alt_L, XK_Alt_R,
+                    XK_Shift_L, XK_Shift_R:
+                    true
+                default:
+                    false
+                }
+            if isChordingKey && rimeAPI.get_option(session, "_chord_typing") {
+                updateChord(keycode: rimeKeycode, modifiers: rimeModifiers)
+            } else if (rimeModifiers & kReleaseMask.rawValue) == 0 {
+                // non-chording key pressed
+                clearChord()
+            }
+        }
+
+        return handled
     }
 
     fileprivate func rimeConsumeCommittedText() {
@@ -730,16 +634,7 @@ extension SquirrelInputController {
                 page: page, lastPage: lastPage)
             _ = rimeAPI.free_context(&ctx)
         } else {
-            // 在异步模式下，如果有活跃输入则不隐藏面板
-            if let processor = asyncProcessor {
-                if !forceShowPanel && !processor.hasInput() {
-                    hidePalettes()
-                }
-                // 如果 forceShowPanel 为 true 或有输入内容，保持面板显示
-            } else {
-                // 同步模式下的原有逻辑
-                hidePalettes()
-            }
+            hidePalettes()
         }
     }
 

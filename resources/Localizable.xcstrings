@@ -1,6 +1,63 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
+    "%lld" : {
+
+    },
+    "%lld %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld %2$@"
+          }
+        }
+      }
+    },
+    "%lld documents • %lld chunks" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld documents • %2$lld chunks"
+          }
+        }
+      }
+    },
+    "%lld ms" : {
+
+    },
+    "%lld/%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "•" : {
+
+    },
+    "⌘↵" : {
+
+    },
+    "30" : {
+
+    },
+    "100" : {
+
+    },
+    "100 ms" : {
+
+    },
+    "2000 ms" : {
+
+    },
     "A new update is available" : {
       "comment" : "Update",
       "localizations" : {
@@ -18,6 +75,90 @@
         }
       }
     },
+    "actions" : {
+
+    },
+    "activate" : {
+
+    },
+    "active" : {
+
+    },
+    "add_knowledge_base" : {
+
+    },
+    "add_knowledge_base_hint" : {
+
+    },
+    "add_provider" : {
+
+    },
+    "adjust_avatar" : {
+
+    },
+    "ai_acceptance_tooltip" : {
+
+    },
+    "ai_provider" : {
+
+    },
+    "API Base URL" : {
+
+    },
+    "API Key" : {
+
+    },
+    "api_configuration" : {
+
+    },
+    "api_endpoint" : {
+
+    },
+    "api_key" : {
+
+    },
+    "api_key_info" : {
+
+    },
+    "api_key_status" : {
+
+    },
+    "api_settings" : {
+
+    },
+    "appearance" : {
+
+    },
+    "Available placeholders: {context}, {query}" : {
+
+    },
+    "available_models" : {
+
+    },
+    "basic_information" : {
+
+    },
+    "browse" : {
+
+    },
+    "browse_file" : {
+
+    },
+    "cancel" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "cancelled" : {
+
+    },
+    "change_avatar" : {
+
+    },
+    "Characters limit for context text" : {
+
+    },
     "Check for updates..." : {
       "comment" : "Menu item",
       "localizations" : {
@@ -34,6 +175,108 @@
           }
         }
       }
+    },
+    "checking_robots" : {
+
+    },
+    "clear_data" : {
+
+    },
+    "clear_data_desc" : {
+
+    },
+    "close_tab" : {
+
+    },
+    "completing_processing" : {
+
+    },
+    "configuration" : {
+
+    },
+    "configure" : {
+
+    },
+    "Configure how knowledge base content is retrieved and used" : {
+
+    },
+    "configure_provider_first" : {
+
+    },
+    "configured" : {
+
+    },
+    "configured_knowledge_bases" : {
+
+    },
+    "configured_providers" : {
+
+    },
+    "confirm" : {
+
+    },
+    "connecting_to_api" : {
+
+    },
+    "connection_failed" : {
+
+    },
+    "connection_successful" : {
+
+    },
+    "connection_test" : {
+
+    },
+    "Context: %lld tokens" : {
+
+    },
+    "crawl_depth" : {
+
+    },
+    "crawl_depth_hint" : {
+
+    },
+    "crawl_website" : {
+
+    },
+    "crawl_website_desc" : {
+
+    },
+    "crawling_website" : {
+
+    },
+    "Create one in Settings to get started" : {
+
+    },
+    "current_provider" : {
+
+    },
+    "current_status" : {
+
+    },
+    "dark_mode" : {
+
+    },
+    "days_ago" : {
+
+    },
+    "Default Model" : {
+
+    },
+    "delete" : {
+
+    },
+    "delete_knowledge_base" : {
+
+    },
+    "delete_knowledge_base_message" : {
+
+    },
+    "delete_provider" : {
+
+    },
+    "delete_session" : {
+
     },
     "Deploy" : {
       "comment" : "Menu item",
@@ -140,6 +383,156 @@
         }
       }
     },
+    "description_optional" : {
+
+    },
+    "e.g., /path/to/model" : {
+
+    },
+    "e.g., gpt-3.5-turbo" : {
+
+    },
+    "e.g., My OpenAI" : {
+
+    },
+    "edit_knowledge_base" : {
+
+    },
+    "embedding_provider" : {
+
+    },
+    "embedding_settings" : {
+
+    },
+    "embedding_settings_description" : {
+
+    },
+    "Enable RAG" : {
+
+    },
+    "enabled" : {
+
+    },
+    "Enter your API key" : {
+
+    },
+    "enter_api_endpoint" : {
+
+    },
+    "enter_api_key" : {
+
+    },
+    "enter_kb_description" : {
+
+    },
+    "enter_kb_name" : {
+
+    },
+    "enter_prompt" : {
+
+    },
+    "enter_website_url" : {
+
+    },
+    "extensions_hint" : {
+
+    },
+    "extensions_placeholder" : {
+
+    },
+    "fetching_document_count" : {
+
+    },
+    "folder_path" : {
+
+    },
+    "general_settings" : {
+
+    },
+    "get_openai_key" : {
+
+    },
+    "guest" : {
+
+    },
+    "https://api.example.com/v1" : {
+
+    },
+    "Include Metadata" : {
+
+    },
+    "include_subfolders" : {
+
+    },
+    "index_files" : {
+
+    },
+    "index_files_desc" : {
+
+    },
+    "initializing_crawler" : {
+
+    },
+    "input_interval" : {
+
+    },
+    "input_parameters" : {
+
+    },
+    "interval_hint" : {
+
+    },
+    "kb_status_disabled" : {
+
+    },
+    "kb_status_error" : {
+
+    },
+    "kb_status_needs_crawling" : {
+
+    },
+    "kb_status_needs_indexing" : {
+
+    },
+    "kb_status_needs_sync" : {
+
+    },
+    "kb_status_not_configured" : {
+
+    },
+    "kb_status_processing" : {
+
+    },
+    "kb_status_ready" : {
+
+    },
+    "knowledge_base_description" : {
+
+    },
+    "knowledge_base_name" : {
+
+    },
+    "knowledge_base_settings" : {
+
+    },
+    "knowledge_base_type" : {
+
+    },
+    "knowledge_bases_count" : {
+
+    },
+    "kpm" : {
+
+    },
+    "last_updated" : {
+
+    },
+    "light_mode" : {
+
+    },
+    "local_model" : {
+
+    },
     "Logs..." : {
       "comment" : "Menu item",
       "localizations" : {
@@ -156,6 +549,123 @@
           }
         }
       }
+    },
+    "max_pages" : {
+
+    },
+    "Maximum Context Length" : {
+
+    },
+    "Maximum Results" : {
+
+    },
+    "messages" : {
+
+    },
+    "Minimum similarity score (0.0 - 1.0)" : {
+
+    },
+    "model" : {
+
+    },
+    "model_identifier" : {
+
+    },
+    "model_name" : {
+
+    },
+    "model_path_hint" : {
+
+    },
+    "model_url" : {
+
+    },
+    "models_count" : {
+
+    },
+    "No knowledge base selected" : {
+
+    },
+    "No Knowledge Bases" : {
+
+    },
+    "no_active_provider" : {
+
+    },
+    "no_history" : {
+
+    },
+    "no_knowledge_bases" : {
+
+    },
+    "no_matching_plugins" : {
+
+    },
+    "no_models" : {
+
+    },
+    "no_plugins" : {
+
+    },
+    "no_providers" : {
+
+    },
+    "not_configured" : {
+
+    },
+    "Number of chunks to retrieve" : {
+
+    },
+    "Please configure your AI provider." : {
+
+    },
+    "Plugin Directory" : {
+
+    },
+    "processing" : {
+
+    },
+    "processing_cancelled" : {
+
+    },
+    "processing_completed" : {
+
+    },
+    "processing_files" : {
+
+    },
+    "Provider" : {
+
+    },
+    "provider_name" : {
+
+    },
+    "RAG Configuration" : {
+
+    },
+    "refresh" : {
+
+    },
+    "refresh_models_hint" : {
+
+    },
+    "requires_api_key" : {
+
+    },
+    "Reset" : {
+
+    },
+    "Reset Configuration" : {
+
+    },
+    "Reset to Default" : {
+
+    },
+    "reset_defaults" : {
+
+    },
+    "respect_robots_txt" : {
+
     },
     "Rime Wiki..." : {
       "comment" : "Menu item",
@@ -174,6 +684,48 @@
         }
       }
     },
+    "Run" : {
+
+    },
+    "save" : {
+
+    },
+    "Save" : {
+
+    },
+    "Save Configuration" : {
+
+    },
+    "save_changes" : {
+
+    },
+    "save_settings" : {
+
+    },
+    "scanning_folder" : {
+
+    },
+    "search_plugins" : {
+
+    },
+    "select" : {
+
+    },
+    "Select Knowledge Base" : {
+
+    },
+    "select_folder" : {
+
+    },
+    "select_plugin" : {
+
+    },
+    "selected" : {
+
+    },
+    "selected_provider" : {
+
+    },
     "Settings..." : {
       "comment" : "Menu item",
       "localizations" : {
@@ -190,6 +742,15 @@
           }
         }
       }
+    },
+    "Show similarity scores in context" : {
+
+    },
+    "Similarity Threshold" : {
+
+    },
+    "skin_theme" : {
+
     },
     "Squirrel" : {
       "comment" : "Menu title",
@@ -208,6 +769,21 @@
         }
       }
     },
+    "starting_processing" : {
+
+    },
+    "status" : {
+
+    },
+    "supported_extensions" : {
+
+    },
+    "switch_to_dark" : {
+
+    },
+    "switch_to_light" : {
+
+    },
     "Sync user data" : {
       "comment" : "Menu item",
       "localizations" : {
@@ -225,6 +801,48 @@
         }
       }
     },
+    "sync_data" : {
+
+    },
+    "sync_data_desc" : {
+
+    },
+    "syncing_documents" : {
+
+    },
+    "Template:" : {
+
+    },
+    "test_connection" : {
+
+    },
+    "theme_hint" : {
+
+    },
+    "This will reset all RAG configuration to default values. This action cannot be undone." : {
+
+    },
+    "timeout_seconds" : {
+
+    },
+    "title_separator" : {
+
+    },
+    "typing_speed_tooltip" : {
+
+    },
+    "user_name" : {
+
+    },
+    "vector_dimension" : {
+
+    },
+    "vectorizing_documents" : {
+
+    },
+    "vectors" : {
+
+    },
     "Version [version] is now available" : {
       "comment" : "Update",
       "localizations" : {
@@ -241,6 +859,15 @@
           }
         }
       }
+    },
+    "website_url" : {
+
+    },
+    "Welcome to AI Plugins" : {
+
+    },
+    "yesterday" : {
+
     }
   },
   "version" : "1.0"

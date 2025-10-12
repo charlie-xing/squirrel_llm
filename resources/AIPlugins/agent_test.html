@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent & MCP API 测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f7;
+        }
+        h1 {
+            color: #1d1d1f;
+            border-bottom: 2px solid #0071e3;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            color: #0071e3;
+            margin-top: 0;
+        }
+        button {
+            background: #0071e3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0077ED;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            background: #f9f9f9;
+            border-left: 4px solid #0071e3;
+            padding: 16px;
+            margin: 16px 0;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { border-left-color: #34c759; }
+        .error { border-left-color: #ff3b30; }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .status.ok { background: #d1f2eb; color: #0a5f38; }
+        .status.fail { background: #fadbd8; color: #7a2520; }
+        .info-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Agent & MCP API 测试工具</h1>
+
+    <div class="info-box">
+        <strong>⚠️ 开发模式</strong><br>
+        当前使用 Mock API 进行测试。所有调用返回模拟数据，用于验证 API 设计和接口完整性。
+    </div>
+
+    <!-- Agent API 测试 -->
+    <div class="test-section">
+        <h2>🤖 Agent API 测试</h2>
+
+        <h3>1. 注册 Agent</h3>
+        <button onclick="testRegisterAgent()">注册测试 Agent</button>
+        <div id="register-result" class="result" style="display:none;"></div>
+
+        <h3>2. 列出 Agents</h3>
+        <button onclick="testListAgents()">获取 Agent 列表</button>
+        <div id="list-result" class="result" style="display:none;"></div>
+
+        <h3>3. 调用 Agent (普通)</h3>
+        <button onclick="testInvokeAgent()">调用 Agent</button>
+        <div id="invoke-result" class="result" style="display:none;"></div>
+
+        <h3>4. 流式调用 Agent</h3>
+        <button onclick="testStreamAgent()" id="stream-btn">开始流式调用</button>
+        <div id="stream-result" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- MCP API 测试 -->
+    <div class="test-section">
+        <h2>🔌 MCP API 测试</h2>
+
+        <h3>1. 获取 MCP 上下文</h3>
+        <button onclick="testGetContext()">获取上下文</button>
+        <div id="context-result" class="result" style="display:none;"></div>
+
+        <h3>2. 列出 MCP 工具</h3>
+        <button onclick="testListTools()">列出工具</button>
+        <div id="tools-result" class="result" style="display:none;"></div>
+
+        <h3>3. 使用 MCP 工具</h3>
+        <button onclick="testUseTool()">调用工具</button>
+        <div id="use-tool-result" class="result" style="display:none;"></div>
+
+        <h3>4. 获取 MCP 资源</h3>
+        <button onclick="testGetResource()">获取资源</button>
+        <div id="resource-result" class="result" style="display:none;"></div>
+
+        <h3>5. 获取提示词</h3>
+        <button onclick="testGetPrompt()">获取提示词</button>
+        <div id="prompt-result" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- 性能测试 -->
+    <div class="test-section">
+        <h2>⚡ 性能监控测试</h2>
+        <button onclick="testPerformance()">测试性能监控</button>
+        <div id="perf-result" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- 引入 Bridge SDK -->
+    <script src="sdk_v2/squirrel-bridge.js"></script>
+
+    <script>
+        // 强制启用开发模式（在 SDK 加载前设置）
+        // 这样可以避免尝试调用真实的 webkit.messageHandlers
+        if (!window.webkit || !window.webkit.messageHandlers) {
+            console.log('[Test] Running in browser mode - enabling Mock API');
+            // SDK 会检测到没有 webkit 并自动使用 Mock
+        }
+
+        // 等待 SDK 加载完成
+        if (window.SquirrelBridge) {
+            window.SquirrelBridge.isDevelopment = true;
+            console.log('[Test] Mock API enabled');
+        } else {
+            console.error('[Test] SquirrelBridge not loaded!');
+        }
+
+        // 辅助函数
+        function showResult(id, content, isError = false) {
+            const el = document.getElementById(id);
+            el.textContent = content;
+            el.className = isError ? 'result error' : 'result success';
+            el.style.display = 'block';
+        }
+
+        // ========== Agent 测试 ==========
+
+        async function testRegisterAgent() {
+            try {
+                console.log('[Test] Registering agent...');
+                await SquirrelBridge.Agent.registerAgent({
+                    id: 'test-agent-1',
+                    name: '测试 Agent',
+                    description: '这是一个测试用的 Agent',
+                    endpoint: 'http://localhost:8000/agent',
+                    auth: {
+                        type: 'bearer',
+                        token: 'test-token-12345'
+                    },
+                    capabilities: ['chat', 'analyze', 'summarize'],
+                    timeout: 30000
+                });
+
+                showResult('register-result',
+                    '✅ Agent 注册成功!\n\n' +
+                    'Agent ID: test-agent-1\n' +
+                    'Name: 测试 Agent\n' +
+                    'Endpoint: http://localhost:8000/agent\n' +
+                    'Auth Type: bearer\n' +
+                    'Capabilities: chat, analyze, summarize'
+                );
+            } catch (error) {
+                showResult('register-result', `❌ 错误: ${error.message}`, true);
+            }
+        }
+
+        async function testListAgents() {
+            try {
+                console.log('[Test] Listing agents...');
+                const agents = await SquirrelBridge.Agent.listAgents();
+
+                let result = `✅ 找到 ${agents.length} 个 Agent:\n\n`;
+                agents.forEach((agent, i) => {
+                    result += `${i + 1}. ${agent.name} (${agent.id})\n`;
+                    result += `   Endpoint: ${agent.endpoint}\n`;
+                    result += `   Capabilities: ${agent.capabilities?.join(', ') || 'N/A'}\n\n`;
+                });
+
+                showResult('list-result', result);
+            } catch (error) {
+                showResult('list-result', `❌ 错误: ${error.message}`, true);
+            }
+        }
+
+        async function testInvokeAgent() {
+            try {
+                console.log('[Test] Invoking agent...');
+
+                SquirrelBridge.Performance.mark('invoke.start');
+
+                const response = await SquirrelBridge.Agent.invoke({
+                    agent: 'test-agent-1',
+                    action: 'analyze',
+                    params: {
+                        text: '这是一段需要分析的测试文本',
+                        options: { detailed: true }
+                    }
+                });
+
+                SquirrelBridge.Performance.mark('invoke.end');
+                const perf = SquirrelBridge.Performance.measure(
+                    'Agent Invoke',
+                    'invoke.start',
+                    'invoke.end'
+                );
+
+                let result = `✅ Agent 调用成功!\n\n`;
+                result += `Success: ${response.success}\n`;
+                result += `Data: ${JSON.stringify(response.data, null, 2)}\n`;
+                result += `Metadata: ${JSON.stringify(response.metadata, null, 2)}\n\n`;
+                result += `⏱️ 性能: ${perf.duration.toFixed(2)}ms`;
+
+                showResult('invoke-result', result);
+            } catch (error) {
+                showResult('invoke-result', `❌ 错误: ${error.message}`, true);
+            }
+        }
+
+        async function testStreamAgent() {
+            const btn = document.getElementById('stream-btn');
+            btn.disabled = true;
+
+            try {
+                console.log('[Test] Stream invoking agent...');
+
+                let result = '🔄 开始流式调用...\n\n';
+                showResult('stream-result', result);
+
+                let chunkCount = 0;
+
+                await SquirrelBridge.Agent.streamInvoke({
+                    agent: 'test-agent-1',
+                    action: 'generate',
+                    params: {
+                        prompt: '生成一段关于 AI 的文本'
+                    },
+                    onChunk: (chunk) => {
+                        chunkCount++;
+                        result += `Chunk ${chunkCount}: ${chunk}\n`;
+                        showResult('stream-result', result);
+                    },
+                    onComplete: (finalData) => {
+                        result += `\n✅ 流式调用完成!\n`;
+                        result += `总共收到 ${chunkCount} 个数据块\n`;
+                        result += `Final data: ${JSON.stringify(finalData, null, 2)}`;
+                        showResult('stream-result', result);
+                        btn.disabled = false;
+                    },
+                    onError: (error) => {
+                        result += `\n❌ 错误: ${error}`;
+                        showResult('stream-result', result, true);
+                        btn.disabled = false;
+                    }
+                });
+            } catch (error) {
+                showResult('stream-result', `❌ 错误: ${error.message}`, true);
+                btn.disabled = false;
+            }
+        }
+
+        // ========== MCP 测试 ==========
+
+        async function testGetContext() {
+            try {
+                console.log('[Test] Getting MCP context...');
+                const context = await SquirrelBridge.MCP.getContext();
+
+                let result = '✅ MCP 上下文获取成功!\n\n';
+                result += `Resources: ${context.resources.length}\n`;
+                result += `Tools: ${context.tools.length}\n`;
+                result += `Prompts: ${context.prompts.length}\n\n`;
+                result += `Server Info:\n`;
+                result += `  Name: ${context.serverInfo.name}\n`;
+                result += `  Version: ${context.serverInfo.version}\n`;
+                result += `  Protocol: ${context.serverInfo.protocolVersion}\n`;
+
+                showResult('context-result', result);
+            } catch (error) {
+                showResult('context-result', `❌ 错误: ${error.message}`, true);
+            }
+        }
+
+        async function testListTools() {
+            try {
+                console.log('[Test] Listing MCP tools...');
+                const tools = await SquirrelBridge.MCP.listTools();
+
+                let result = `✅ 找到 ${tools.length} 个工具:\n\n`;
+                tools.forEach((tool, i) => {
+                    result += `${i + 1}. ${tool.name}\n`;
+                    result += `   Description: ${tool.description}\n`;
+                    result += `   Schema: ${JSON.stringify(tool.inputSchema, null, 2)}\n\n`;
+                });
+
+                showResult('tools-result', result);
+            } catch (error) {
+                showResult('tools-result', `❌ 错误: ${error.message}`, true);
+            }
+        }
+
+        async function testUseTool() {
+            try {
+                console.log('[Test] Using MCP tool...');
+
+                SquirrelBridge.Performance.mark('tool.start');
+
+                const result = await SquirrelBridge.MCP.useTool('mock_tool', {
+                    query: '测试查询'
+                });
+
+                SquirrelBridge.Performance.mark('tool.end');
+                const perf = SquirrelBridge.Performance.measure(
+                    'MCP Tool',
+                    'tool.start',
+                    'tool.end'
+                );
+
+                let output = `✅ 工具调用成功!\n\n`;
+                output += `Success: ${result.success}\n`;
+                output += `Content:\n`;
+                result.content.forEach((item, i) => {
+                    output += `  ${i + 1}. Type: ${item.type}\n`;
+                    output += `     Text: ${item.text}\n`;
+                });
+                output += `\n⏱️ 性能: ${perf.duration.toFixed(2)}ms`;
+
+                showResult('use-tool-result', output);
+            } catch (error) {
+                showResult('use-tool-result', `❌ 错误: ${error.message}`, true);
+            }
+        }
+
+        async function testGetResource() {
+            try {
+                console.log('[Test] Getting MCP resource...');
+                const content = await SquirrelBridge.MCP.getResource('file:///mock/document.txt');
+
+                let result = '✅ 资源获取成功!\n\n';
+                result += `URI: ${content.uri}\n`;
+                result += `MIME Type: ${content.mimeType}\n`;
+                result += `Content:\n${content.text}`;
+
+                showResult('resource-result', result);
+            } catch (error) {
+                showResult('resource-result', `❌ 错误: ${error.message}`, true);
+            }
+        }
+
+        async function testGetPrompt() {
+            try {
+                console.log('[Test] Getting MCP prompt...');
+                const prompt = await SquirrelBridge.MCP.getPrompt('mock_prompt', {
+                    topic: 'AI 技术'
+                });
+
+                let result = '✅ 提示词获取成功!\n\n';
+                result += `Description: ${prompt.description}\n\n`;
+                result += `Messages:\n`;
+                prompt.messages.forEach((msg, i) => {
+                    result += `${i + 1}. Role: ${msg.role}\n`;
+                    result += `   Content: ${msg.content.text}\n\n`;
+                });
+
+                showResult('prompt-result', result);
+            } catch (error) {
+                showResult('prompt-result', `❌ 错误: ${error.message}`, true);
+            }
+        }
+
+        // ========== 性能测试 ==========
+
+        async function testPerformance() {
+            try {
+                console.log('[Test] Testing performance monitoring...');
+
+                // 执行多个操作测试性能
+                SquirrelBridge.Performance.mark('test.start');
+
+                await SquirrelBridge.Agent.listAgents();
+                SquirrelBridge.Performance.mark('agents.done');
+
+                await SquirrelBridge.MCP.listTools();
+                SquirrelBridge.Performance.mark('tools.done');
+
+                await SquirrelBridge.MCP.getContext();
+                SquirrelBridge.Performance.mark('test.end');
+
+                const total = SquirrelBridge.Performance.measure(
+                    'Total Test',
+                    'test.start',
+                    'test.end'
+                );
+
+                const entries = SquirrelBridge.Performance.getEntries();
+
+                let result = '✅ 性能监控测试完成!\n\n';
+                result += `总耗时: ${total.duration.toFixed(2)}ms\n\n`;
+                result += `所有性能记录:\n`;
+                entries.forEach(entry => {
+                    result += `  ${entry.name}: ${entry.timestamp}ms\n`;
+                });
+
+                showResult('perf-result', result);
+            } catch (error) {
+                showResult('perf-result', `❌ 错误: ${error.message}`, true);
+            }
+        }
+
+        // 页面加载时的初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('[Test] Agent & MCP Test Tool loaded');
+            console.log('[Test] SquirrelBridge version:', window.SquirrelBridge);
+        });
+    </script>
+</body>
+</html>

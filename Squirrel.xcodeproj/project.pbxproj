@@ -130,7 +130,6 @@
 		7B5488C01D2DACDF0056A1BE /* luna_pinyin.schema.yaml in Copy Shared Support Files */ = {isa = PBXBuildFile; fileRef = 7B5488321D2DAAD10056A1BE /* luna_pinyin.schema.yaml */; };
 		7B5488C11D2DACDF0056A1BE /* luna_quanpin.schema.yaml in Copy Shared Support Files */ = {isa = PBXBuildFile; fileRef = 7B5488331D2DAAD10056A1BE /* luna_quanpin.schema.yaml */; };
 		7B5488C91D2DACDF0056A1BE /* symbols.yaml in Copy Shared Support Files */ = {isa = PBXBuildFile; fileRef = 7B54883B1D2DAAD10056A1BE /* symbols.yaml */; };
-		7B6A89662E8AC8F9008D88C8 /* AsyncRimeProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B6A89652E8AC8F9008D88C8 /* AsyncRimeProcessor.swift */; };
 		7C3968E26681040D8C691C20 /* WebCrawlerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F06F91A06E3AF5D7FDA872 /* WebCrawlerProcessor.swift */; };
 		7D27E9DF79184A25B618CE9E /* AddKnowledgeBaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38BC38EFE79E4DE0A48FB6B2 /* AddKnowledgeBaseView.swift */; };
 		7FCF843E50405F4340861EBD /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A6C07D72CE9D56145D824A8 /* WebView.swift */; };
@@ -430,7 +429,6 @@
 		7B5488321D2DAAD10056A1BE /* luna_pinyin.schema.yaml */ = {isa = PBXFileReference; lastKnownFileType = text; name = luna_pinyin.schema.yaml; path = data/plum/luna_pinyin.schema.yaml; sourceTree = "<group>"; };
 		7B5488331D2DAAD10056A1BE /* luna_quanpin.schema.yaml */ = {isa = PBXFileReference; lastKnownFileType = text; name = luna_quanpin.schema.yaml; path = data/plum/luna_quanpin.schema.yaml; sourceTree = "<group>"; };
 		7B54883B1D2DAAD10056A1BE /* symbols.yaml */ = {isa = PBXFileReference; lastKnownFileType = text; name = symbols.yaml; path = data/plum/symbols.yaml; sourceTree = "<group>"; };
-		7B6A89652E8AC8F9008D88C8 /* AsyncRimeProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = sources/AsyncRimeProcessor.swift; sourceTree = "<group>"; };
 		7E978127690D4DCAA87648D7 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppSettings.swift; path = sources/AIPlugins/Models/AppSettings.swift; sourceTree = "<group>"; };
 		889BAB66C6B6682A73E857DE /* AIAPIService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AIAPIService.swift; path = sources/AIPlugins/Services/AIAPIService.swift; sourceTree = "<group>"; };
 		8A6C07D72CE9D56145D824A8 /* WebView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WebView.swift; path = sources/AIPlugins/Views/Shared/WebView.swift; sourceTree = "<group>"; };

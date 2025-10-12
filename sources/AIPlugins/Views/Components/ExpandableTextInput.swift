@@ -416,7 +416,23 @@ class CustomTextView: NSTextView {
             onCommandEnter?()
             return
         }
+
+        // Allow all other key combinations (including Cmd+C, Cmd+V, etc.) to pass through
         super.keyDown(with: event)
+    }
+
+    // Override to ensure copy/paste/cut shortcuts work properly
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        // Let standard editing shortcuts pass through to the responder chain
+        if event.modifierFlags.contains(.command) {
+            switch event.charactersIgnoringModifiers {
+            case "c", "v", "x", "a", "z": // Copy, Paste, Cut, Select All, Undo
+                return super.performKeyEquivalent(with: event)
+            default:
+                break
+            }
+        }
+        return super.performKeyEquivalent(with: event)
     }
 }
 
@@ -450,9 +466,13 @@ struct ExpandableTextEditor: NSViewRepresentable {
         textView.delegate = context.coordinator
         textView.isRichText = false
         textView.font = .systemFont(ofSize: 14)
-        textView.textColor = NSColor.textColor  // System text color (adapts to dark mode)
-        textView.backgroundColor = NSColor.textBackgroundColor  // System background (adapts to dark mode)
-        textView.drawsBackground = true
+
+        // Ensure text is always visible with proper contrast
+        // Use labelColor instead of textColor for better visibility
+        textView.textColor = NSColor.labelColor  // Better contrast than textColor
+        textView.backgroundColor = NSColor.controlBackgroundColor  // Use control background for input fields
+        textView.drawsBackground = true  // Must draw background for visibility
+
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.isAutomaticDashSubstitutionEnabled = false
         textView.isAutomaticTextReplacementEnabled = false
@@ -460,7 +480,9 @@ struct ExpandableTextEditor: NSViewRepresentable {
         textView.isEditable = true
         textView.isSelectable = true
         textView.allowsUndo = true
-        textView.insertionPointColor = NSColor.textColor  // Cursor color matches text
+
+        // Ensure cursor is visible
+        textView.insertionPointColor = NSColor.labelColor  // Match text color for visibility
 
         // Configure scroll view
         scrollView.documentView = textView
@@ -468,7 +490,7 @@ struct ExpandableTextEditor: NSViewRepresentable {
         scrollView.hasHorizontalScroller = false
         scrollView.autohidesScrollers = true
         scrollView.drawsBackground = true  // Must draw background to show text
-        scrollView.backgroundColor = NSColor.textBackgroundColor  // System background (adapts to dark mode)
+        scrollView.backgroundColor = NSColor.controlBackgroundColor  // Match textView background
         scrollView.borderType = .noBorder
 
         // Configure text container - DON'T set containerSize, let it auto-resize

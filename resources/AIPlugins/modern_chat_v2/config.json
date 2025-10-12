@@ -1,0 +1,28 @@
+{
+  "id": "com.squirrel.modern_chat_v2",
+  "name": "现代聊天 v2",
+  "version": "2.0.0",
+  "description": "基于新架构的现代化聊天插件示例",
+  "author": "Squirrel Team",
+  "icon": "assets/icon.png",
+
+  "capabilities": {
+    "ai": ["chat", "stream", "listModels"],
+    "storage": ["local"],
+    "rag": false,
+    "fileAccess": false
+  },
+
+  "ui": {
+    "width": 800,
+    "height": 600,
+    "resizable": true,
+    "theme": "auto"
+  },
+
+  "entry": "index.html",
+  "api": {
+    "version": "2.0",
+    "minAppVersion": "1.0.0"
+  }
+}
