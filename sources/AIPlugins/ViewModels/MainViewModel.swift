@@ -198,6 +198,9 @@ class MainViewModel: ObservableObject {
             print("Creating new tab with id: \(newTab.id.uuidString)")
             openTabs.append(newTab)
             activeTabId = newTab.id
+
+            // Initialize the plugin HTML immediately so WebView is ready
+            newTab.viewModel.initializePlugin(plugin: plugin)
         }
 
         // Update window title

@@ -8,15 +8,22 @@ class PluginViewModel: ObservableObject {
     @Published var webViewContent: String = ""
     @Published var prompt: String = ""
 
+    // UI 绑定的输入框内容（每个标签页独立）
+    @Published var inputPrompt: String = ""
+    @Published var selectedKnowledgeBase: KnowledgeBase?
+
+    // 加载状态
+    @Published var isLoading: Bool = false
+    @Published var loadingMessage: String = ""
+
     let tabId: UUID
+    let settings: AppSettings
     private var cancellables = Set<AnyCancellable>()
     weak var webView: WKWebView?  // Will be set by PluginWebView
     private var isPluginLoaded = false
     private var currentPlugin: Plugin?
-    private let settings: AppSettings
 
     // RAG 相关
-    var selectedKnowledgeBase: KnowledgeBase?
     private var currentRAGContext: RAGContext?
     private let ragService = RAGService.shared
     private var currentEnhancedPrompt: String?
@@ -37,8 +44,42 @@ class PluginViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
+    /// Initialize plugin HTML without executing (called when tab is first opened)
+    func initializePlugin(plugin: Plugin) {
+        print("PluginViewModel [\(tabId.uuidString.prefix(8))]: Initializing plugin '\(plugin.name)'")
+
+        // Skip if already loaded
+        if isPluginLoaded && currentPlugin?.id == plugin.id {
+            print("PluginViewModel: Plugin already initialized")
+            return
+        }
+
+        // Don't show loading indicator - it causes UI refresh issues
+        // isLoading = true
+        // loadingMessage = "加载插件..."
+
+        guard let pluginJS = loadPluginScript(plugin: plugin) else {
+            print("PluginViewModel: Failed to load plugin script")
+            self.webViewContent =
+                "<html><body><h1>Error</h1><p>Failed to load plugin script.</p></body></html>"
+            return
+        }
+
+        let htmlPage = createHTMLPage(pluginScript: pluginJS)
+        self.webViewContent = htmlPage
+        self.isPluginLoaded = true
+        self.currentPlugin = plugin
+
+        print("PluginViewModel: Plugin HTML set and ready")
+    }
+
     func runPlugin(plugin: Plugin, knowledgeBase: KnowledgeBase? = nil) {
-        print("PluginViewModel: Running plugin '\(plugin.name)' with prompt: '\(prompt)'")
+        print("PluginViewModel [\(tabId.uuidString.prefix(8))]: Running plugin '\(plugin.name)' with prompt: '\(prompt)'")
+
+        guard let webView = webView else {
+            print("PluginViewModel: ERROR - WebView reference is nil!")
+            return
+        }
 
         let currentPrompt = prompt
         prompt = ""
@@ -49,7 +90,10 @@ class PluginViewModel: ObservableObject {
         }
 
         // If this is the first run or a different plugin, load the HTML
+        // Note: This should rarely happen now since plugins are pre-initialized in initializePlugin
         if !isPluginLoaded || currentPlugin?.id != plugin.id {
+            print("PluginViewModel: Plugin not loaded, loading now (this shouldn't normally happen)")
+
             guard let pluginJS = loadPluginScript(plugin: plugin) else {
                 print("PluginViewModel: Failed to load plugin script")
                 self.webViewContent =
@@ -63,24 +107,86 @@ class PluginViewModel: ObservableObject {
             self.currentPlugin = plugin
 
             // Only execute plugin if there's a prompt to process
-            // If prompt is empty, let the JavaScript auto-initialization handle the initial UI
             if !currentPrompt.isEmpty {
-                // Execute plugin after delay to ensure HTML and auto-init complete
-                // Auto-init in DOMContentLoaded needs time to load marked.js and highlight.js
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                // Wait for WebView to finish loading, then execute
+                waitForWebViewReady { [weak self] in
                     self?.executePluginWithRAG(prompt: currentPrompt)
                 }
             } else {
-                print("PluginViewModel: Plugin loaded with empty prompt, skipping executePlugin (auto-init will handle UI)")
+                print("PluginViewModel: Plugin loaded with empty prompt, skipping executePlugin")
             }
         } else {
-            // Plugin already loaded, only execute if there's a prompt
+            // Plugin already loaded, execute immediately if there's a prompt
             if !currentPrompt.isEmpty {
                 executePluginWithRAG(prompt: currentPrompt)
             } else {
                 print("PluginViewModel: Plugin already loaded, empty prompt, no action needed")
             }
         }
+    }
+
+    /// Wait for WebView to be ready before executing plugin
+    private func waitForWebViewReady(completion: @escaping () -> Void) {
+        guard let webView = webView else {
+            print("PluginViewModel: WebView not available, executing immediately")
+            completion()
+            return
+        }
+
+        var attempts = 0
+        let maxAttempts = 50 // Max 5 seconds (50 * 100ms)
+
+        func checkReady() {
+            // Simple check: just wait for DOMContentLoaded event
+            let checkScript = """
+            (function() {
+                try {
+                    var result = {
+                        readyState: document.readyState,
+                        hasRunPlugin: typeof window.runPlugin !== 'undefined',
+                        hasSettings: typeof window.INITIAL_SETTINGS !== 'undefined',
+                        hasChatPlugin: typeof window.ChatPlugin !== 'undefined',
+                        hasPluginSDK: typeof window.PluginSDK !== 'undefined'
+                    };
+                    console.log('[WebView Check]', JSON.stringify(result));
+                    return document.readyState === 'complete';
+                } catch(e) {
+                    console.error('[WebView Check Error]', e.message);
+                    return false;
+                }
+            })();
+            """
+
+            webView.evaluateJavaScript(checkScript) { result, error in
+                if let error = error {
+                    print("PluginViewModel: Check error: \(error.localizedDescription)")
+                }
+
+                if let isReady = result as? Bool, isReady {
+                    print("PluginViewModel: ✅ WebView ready after \(attempts * 100)ms")
+                    // Wait a bit more for async script loading
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        completion()
+                    }
+                } else {
+                    attempts += 1
+                    if attempts < maxAttempts {
+                        if attempts % 10 == 0 {
+                            print("PluginViewModel: Still waiting... (\(attempts * 100)ms)")
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            checkReady()
+                        }
+                    } else {
+                        print("PluginViewModel: ⚠️ Timeout after \(attempts * 100)ms, executing anyway")
+                        completion()
+                    }
+                }
+            }
+        }
+
+        // Start checking
+        checkReady()
     }
 
     private func executePluginWithRAG(prompt: String) {
@@ -161,26 +267,34 @@ class PluginViewModel: ObservableObject {
         // Then call the plugin with original prompt
         let runPluginScript = """
             (function() {
+                console.log('[Swift->JS] About to call runPlugin');
+                console.log('[Swift->JS] typeof runPlugin:', typeof runPlugin);
                 if (typeof runPlugin === 'function') {
-                    runPlugin('\(escapedPrompt)');
+                    console.log('[Swift->JS] Calling runPlugin with prompt:', '\(escapedPrompt)');
+                    var result = runPlugin('\(escapedPrompt)');
+                    console.log('[Swift->JS] runPlugin returned:', result);
+                    return result;
+                } else {
+                    console.error('[Swift->JS] runPlugin is not a function!');
+                    return 'runPlugin not found';
                 }
-                return null;
             })();
             """
 
         // Execute both scripts sequentially
         webView?.evaluateJavaScript(updateSettingsScript) { [weak self] result, error in
             if let error = error {
-                print("PluginViewModel: Error updating settings: \(error)")
+                print("PluginViewModel: ❌ Error updating settings: \(error)")
             } else {
-                print("PluginViewModel: Successfully injected enhanced prompt to JavaScript")
+                print("PluginViewModel: ✅ Successfully injected enhanced prompt to JavaScript")
             }
 
             self?.webView?.evaluateJavaScript(runPluginScript) { result, error in
                 if let error = error {
-                    print("PluginViewModel: Error executing plugin: \(error)")
+                    print("PluginViewModel: ❌ Error executing plugin: \(error)")
+                    print("PluginViewModel: Error details: \(error.localizedDescription)")
                 } else {
-                    print("PluginViewModel: Successfully called runPlugin with original prompt")
+                    print("PluginViewModel: ✅ runPlugin executed, result: \(String(describing: result))")
                 }
             }
         }

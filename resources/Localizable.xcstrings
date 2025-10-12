@@ -185,7 +185,7 @@
     "clear_data_desc" : {
 
     },
-    "close_tab" : {
+    "Close tab" : {
 
     },
     "completing_processing" : {
@@ -587,6 +587,9 @@
 
     },
     "No Knowledge Bases" : {
+
+    },
+    "No plugin selected" : {
 
     },
     "no_active_provider" : {

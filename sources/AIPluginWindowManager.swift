@@ -27,9 +27,9 @@ final class AIPluginWindowManager: NSObject {
 
         hostingController = NSHostingController(rootView: rootView)
 
-        // 创建窗口 - 设置默认尺寸
+        // 创建窗口 - 设置默认尺寸（减少 1/3 高度：720 -> 480）
         window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 1150, height: 720),
+            contentRect: NSRect(x: 0, y: 0, width: 1150, height: 480),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
@@ -37,7 +37,7 @@ final class AIPluginWindowManager: NSObject {
 
         window?.title = "AI plugin helper"
         window?.contentViewController = hostingController
-        window?.minSize = NSSize(width: 900, height: 650)
+        window?.minSize = NSSize(width: 900, height: 400)
 
         // 设置窗口级别和行为
         window?.level = .floating

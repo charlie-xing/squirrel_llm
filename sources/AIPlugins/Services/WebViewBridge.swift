@@ -21,22 +21,41 @@ class WebViewBridge: NSObject, WKScriptMessageHandler, @unchecked Sendable {
     func userContentController(
         _ userContentController: WKUserContentController, didReceive message: WKScriptMessage
     ) {
+        // First check if body is a dictionary
+        if let body = message.body as? [String: Any],
+           let action = body["action"] as? String {
+            // Normal structured message
+            print("WebViewBridge [\(tabId.uuidString.prefix(4))]: Received action: \(action)")
+
+            switch action {
+            case "consoleLog":
+                // Handle JavaScript console.log output
+                if let level = body["level"] as? String,
+                   let logMessage = body["message"] as? String {
+                    print("[JS Console.\(level)] \(logMessage)")
+                }
+                return
+            case "log":
+                if let logMessage = body["message"] as? String {
+                    print("[Plugin Log] \(logMessage)")
+                }
+                return
+            default:
+                break
+            }
+        }
+
+        // Handle non-structured messages (fallback)
+        print("WebViewBridge [\(tabId.uuidString.prefix(4))]: Received message: \(message.body)")
+
         guard let body = message.body as? [String: Any],
             let action = body["action"] as? String
         else {
-            print("WebViewBridge: Invalid message format")
+            print("WebViewBridge: Invalid message format, body type: \(type(of: message.body))")
             return
         }
 
-        print("WebViewBridge [\(tabId.uuidString.prefix(4))]: Received action: \(action)")
-
         switch action {
-        case "consoleLog":
-            // Handle JavaScript console.log output
-            if let level = body["level"] as? String,
-               let message = body["message"] as? String {
-                print("[JS Console.\(level)]: \(message)")
-            }
 
         case "log":
             if let logMessage = body["message"] as? String {
