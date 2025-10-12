@@ -1,51 +1,65 @@
-import AppKit
 import SwiftUI
 
-/// Multi-line expandable text input with toolbar
+/// Pure SwiftUI multi-line expandable text input with toolbar
 struct ExpandableTextInput: View {
     @Binding var text: String
     @Binding var selectedKnowledgeBase: KnowledgeBase?
-    @State private var textHeight: CGFloat = 44  // Single line height
-    @State private var isDisabled: Bool = false
+    @FocusState private var isFocused: Bool
     @State private var showingKnowledgeBaseSelection = false
+    @State private var textEditorHeight: CGFloat = 44  // Start at 2 lines
     @ObservedObject private var knowledgeBaseManager = KnowledgeBaseManager()
 
     let placeholder: String
     let onSend: () -> Void
 
-    private let minHeight: CGFloat = 44  // 2 lines (adjusted for proper sizing)
-    private let maxHeight: CGFloat = 110  // 5 lines (adjusted for proper sizing)
     private let lineHeight: CGFloat = 22
+    private let minHeight: CGFloat = 44   // 2 lines
+    private let maxHeight: CGFloat = 110  // 5 lines
 
     var body: some View {
         VStack(spacing: 0) {
             // Text editor area
             ZStack(alignment: .topLeading) {
-                // Placeholder - must be FIRST so it's behind the text editor
+                // Placeholder
                 if text.isEmpty {
                     Text(placeholder)
                         .foregroundColor(.secondary.opacity(0.6))
                         .font(.system(size: 14))
-                        .padding(.horizontal, 8)  // Match textContainerInset (4pt + 4pt extra)
-                        .padding(.top, 8)
+                        .padding(.horizontal, 12)
+                        .padding(.top, 12)
                         .allowsHitTesting(false)
-                        .background(Color.clear)  // Explicitly clear background
                 }
 
-                // Text editor - must be LAST so it's on top
-                ExpandableTextEditor(
-                    text: $text,
-                    height: $textHeight,
-                    isDisabled: $isDisabled,
-                    minHeight: minHeight,
-                    maxHeight: maxHeight,
-                    onSend: onSend
-                )
-                .frame(height: max(minHeight, min(textHeight, maxHeight)))
-                .onTapGesture {
-                    // This ensures the text view gets focus when tapped
+                // TextEditor with dynamic height
+                GeometryReader { geometry in
+                    TextEditor(text: $text)
+                        .focused($isFocused)
+                        .font(.system(size: 14))
+                        .scrollContentBackground(.hidden)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 4)
+                        .onChange(of: text) { newValue in
+                            updateHeight(for: newValue, width: geometry.size.width)
+                        }
+                        .onAppear {
+                            // Auto-focus on appear
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                isFocused = true
+                            }
+                        }
                 }
+                .frame(height: textEditorHeight)
+
+                // Invisible overlay to capture Command+Enter
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onKeyPress(.return, modifiers: .command) { keyPress in
+                        handleSubmit()
+                        return .handled
+                    }
             }
+            .frame(height: textEditorHeight)
+            .background(Color(nsColor: .controlBackgroundColor))
 
             Divider()
 
@@ -91,7 +105,7 @@ struct ExpandableTextInput: View {
                 // Run button
                 Button(action: {
                     print("ExpandableTextInput: Run button clicked, text: '\(text)'")
-                    onSend()
+                    handleSubmit()
                 }) {
                     HStack(spacing: 4) {
                         Text("Run")
@@ -105,18 +119,57 @@ struct ExpandableTextInput: View {
                     .padding(.vertical, 8)
                     .background(
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(text.isEmpty || isDisabled ? Color.gray : Color.accentColor)
+                            .fill(text.isEmpty ? Color.gray : Color.accentColor)
                     )
                 }
                 .buttonStyle(.plain)
-                .disabled(text.isEmpty || isDisabled)
+                .disabled(text.isEmpty)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(Color(NSColor.controlBackgroundColor).opacity(0.3))
+            .background(Color(nsColor: .controlBackgroundColor).opacity(0.3))
         }
-        .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
+        .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
         .cornerRadius(12)
+    }
+
+    private func handleSubmit() {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            print("ExpandableTextInput: Submit ignored - empty text")
+            return
+        }
+        print("ExpandableTextInput: Submitting text: '\(trimmed)'")
+        onSend()
+    }
+
+    private func updateHeight(for text: String, width: CGFloat) {
+        // Calculate the required height based on text content
+        let font = NSFont.systemFont(ofSize: 14)
+        let attributes: [NSAttributedString.Key: Any] = [.font: font]
+
+        // Use NSString to calculate bounding rect
+        let textStorage = NSTextStorage(string: text.isEmpty ? "M" : text, attributes: attributes)
+        let textContainer = NSTextContainer(size: NSSize(width: width - 24, height: .greatestFiniteMagnitude))
+        let layoutManager = NSLayoutManager()
+
+        layoutManager.addTextContainer(textContainer)
+        textStorage.addLayoutManager(layoutManager)
+
+        textContainer.lineFragmentPadding = 0
+        layoutManager.ensureLayout(for: textContainer)
+
+        let usedRect = layoutManager.usedRect(for: textContainer)
+        let calculatedHeight = usedRect.height + 24  // Add padding
+
+        // Clamp between min and max height
+        let newHeight = max(minHeight, min(calculatedHeight, maxHeight))
+
+        if abs(newHeight - textEditorHeight) > 1 {
+            withAnimation(.easeInOut(duration: 0.1)) {
+                textEditorHeight = newHeight
+            }
+        }
     }
 }
 
@@ -145,7 +198,7 @@ struct ToolbarButton: View {
                         .fill(
                             isSelected
                                 ? Color.accentColor.opacity(0.2)
-                                : Color(NSColor.controlBackgroundColor))
+                                : Color(nsColor: .controlBackgroundColor))
                 )
         }
         .buttonStyle(.plain)
@@ -401,218 +454,6 @@ struct KnowledgeBaseSelectionRow: View {
         )
         .onHover { hovering in
             isHovered = hovering
-        }
-    }
-}
-
-/// Custom NSTextView that handles Command+Enter
-class CustomTextView: NSTextView {
-    var onCommandEnter: (() -> Void)?
-
-    override func keyDown(with event: NSEvent) {
-        // Check for Command+Enter
-        if event.keyCode == 36 && event.modifierFlags.contains(.command) {  // 36 = Return key
-            print("CustomTextView: Command+Enter detected via keyDown")
-            onCommandEnter?()
-            return
-        }
-
-        // Allow all other key combinations (including Cmd+C, Cmd+V, etc.) to pass through
-        super.keyDown(with: event)
-    }
-
-    // Override to ensure copy/paste/cut shortcuts work properly
-    override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        // Let standard editing shortcuts pass through to the responder chain
-        if event.modifierFlags.contains(.command) {
-            switch event.charactersIgnoringModifiers {
-            case "c":  // Copy
-                if NSApp.sendAction(#selector(NSText.copy(_:)), to: nil, from: self) {
-                    return true
-                }
-            case "v":  // Paste
-                if NSApp.sendAction(#selector(NSText.paste(_:)), to: nil, from: self) {
-                    return true
-                }
-            case "x":  // Cut
-                if NSApp.sendAction(#selector(NSText.cut(_:)), to: nil, from: self) {
-                    return true
-                }
-            case "a":  // Select All
-                if NSApp.sendAction(#selector(NSText.selectAll(_:)), to: nil, from: self) {
-                    return true
-                }
-            case "z":  // Undo
-                if NSApp.sendAction(Selector(("undo:")), to: nil, from: self) {
-                    return true
-                }
-            default:
-                break
-            }
-        }
-        return super.performKeyEquivalent(with: event)
-    }
-}
-
-/// NSTextView wrapper for multi-line input with auto-expansion
-struct ExpandableTextEditor: NSViewRepresentable {
-    @Binding var text: String
-    @Binding var height: CGFloat
-    @Binding var isDisabled: Bool
-
-    let minHeight: CGFloat
-    let maxHeight: CGFloat
-    let onSend: () -> Void
-
-    func makeNSView(context: Context) -> NSScrollView {
-        let scrollView = NSScrollView()
-        let textView = CustomTextView()
-
-        // Store reference in coordinator
-        context.coordinator.textView = textView
-
-        // Set up Command+Enter handler
-        textView.onCommandEnter = { [weak textView] in
-            guard let textView = textView, !textView.string.isEmpty else { return }
-            print("CustomTextView: onCommandEnter callback triggered")
-            DispatchQueue.main.async {
-                self.onSend()
-            }
-        }
-
-        // Configure text view
-        textView.delegate = context.coordinator
-        textView.isRichText = false
-        textView.font = .systemFont(ofSize: 14)
-
-        // Ensure text is always visible with proper contrast
-        // Use labelColor instead of textColor for better visibility
-        textView.textColor = NSColor.labelColor  // Better contrast than textColor
-        textView.backgroundColor = NSColor.controlBackgroundColor  // Use control background for input fields
-        textView.drawsBackground = true  // Must draw background for visibility
-
-        textView.isAutomaticQuoteSubstitutionEnabled = false
-        textView.isAutomaticDashSubstitutionEnabled = false
-        textView.isAutomaticTextReplacementEnabled = false
-        textView.textContainerInset = NSSize(width: 4, height: 8)  // Reduced padding
-        textView.isEditable = true
-        textView.isSelectable = true
-        textView.allowsUndo = true
-
-        // Ensure cursor is visible
-        textView.insertionPointColor = NSColor.labelColor  // Match text color for visibility
-
-        // Configure scroll view
-        scrollView.documentView = textView
-        scrollView.hasVerticalScroller = true
-        scrollView.hasHorizontalScroller = false
-        scrollView.autohidesScrollers = true
-        scrollView.drawsBackground = true  // Must draw background to show text
-        scrollView.backgroundColor = NSColor.controlBackgroundColor  // Match textView background
-        scrollView.borderType = .noBorder
-
-        // Configure text container - DON'T set containerSize, let it auto-resize
-        textView.textContainer?.widthTracksTextView = true
-        textView.textContainer?.heightTracksTextView = false
-        textView.maxSize = NSSize(
-            width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
-        textView.isHorizontallyResizable = false
-        textView.isVerticallyResizable = true
-
-        // Make sure the text view becomes first responder when window appears
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            textView.window?.makeFirstResponder(textView)
-        }
-
-        return scrollView
-    }
-
-    func updateNSView(_ scrollView: NSScrollView, context: Context) {
-        guard let textView = scrollView.documentView as? NSTextView else { return }
-
-        // FIX: Ensure textView has proper width
-        if textView.frame.width == 0 {
-            let scrollWidth = scrollView.frame.width
-            if scrollWidth > 0 {
-                textView.frame = NSRect(
-                    x: 0, y: 0, width: scrollWidth, height: textView.frame.height)
-                textView.textContainer?.containerSize = NSSize(
-                    width: scrollWidth, height: .greatestFiniteMagnitude)
-            }
-        }
-
-        if textView.string != text {
-            textView.string = text
-            updateHeight(for: textView)
-        }
-
-        textView.isEditable = !isDisabled
-        textView.isSelectable = true
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-
-    private func updateHeight(for textView: NSTextView) {
-        let layoutManager = textView.layoutManager
-        let textContainer = textView.textContainer
-
-        layoutManager?.ensureLayout(for: textContainer!)
-        let usedRect = layoutManager?.usedRect(for: textContainer!)
-        let newHeight = (usedRect?.height ?? 0) + 24  // Add padding
-
-        DispatchQueue.main.async {
-            self.height = max(minHeight, min(newHeight, maxHeight))
-        }
-    }
-
-    class Coordinator: NSObject, NSTextViewDelegate {
-        var parent: ExpandableTextEditor
-        weak var textView: CustomTextView?
-
-        init(_ parent: ExpandableTextEditor) {
-            self.parent = parent
-        }
-
-        func textDidChange(_ notification: Notification) {
-            guard let textView = notification.object as? NSTextView else { return }
-            parent.text = textView.string
-            parent.updateHeight(for: textView)
-        }
-
-        func textView(_ textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
-            print("ExpandableTextInput: doCommandBy called with selector: \(commandSelector)")
-
-            // Command + Enter to send
-            if commandSelector == #selector(NSResponder.insertNewline(_:)) {
-                let event = NSApp.currentEvent
-                print(
-                    "ExpandableTextInput: insertNewline detected, modifierFlags: \(String(describing: event?.modifierFlags))"
-                )
-
-                if event?.modifierFlags.contains(.command) == true {
-                    print("ExpandableTextInput: Command+Enter detected, triggering onSend")
-
-                    // Don't trigger if text is empty or disabled
-                    guard !parent.text.isEmpty && !parent.isDisabled else {
-                        print("ExpandableTextInput: Ignoring - text empty or disabled")
-                        return false
-                    }
-
-                    // Trigger the send action
-                    DispatchQueue.main.async {
-                        self.parent.onSend()
-                    }
-                    return true
-                }
-            }
-            return false
-        }
-
-        @MainActor
-        func focusTextView() {
-            textView?.window?.makeFirstResponder(textView)
         }
     }
 }

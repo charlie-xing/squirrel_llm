@@ -219,22 +219,16 @@ struct TabContentView: View {
                     if !currentPrompt.isEmpty {
                         print("Executing plugin with prompt: '\(currentPrompt)'")
 
-                        // Set prompt BEFORE calling runPlugin
+                        // Set prompt and clear input
                         tab.viewModel.prompt = currentPrompt
-
-                        // Clear input immediately with explicit UI update
-                        DispatchQueue.main.async {
-                            tab.viewModel.inputPrompt = ""
-                            tab.viewModel.objectWillChange.send()
-                            print("Input cleared and UI refreshed")
-                        }
+                        tab.viewModel.inputPrompt = ""
 
                         // Call runPlugin
                         tab.viewModel.runPlugin(
                             plugin: tab.plugin,
                             knowledgeBase: tab.viewModel.selectedKnowledgeBase
                         )
-                        print("Plugin execution started")
+                        print("Plugin execution started, input cleared")
                     } else {
                         print("WARNING: Input prompt is empty or whitespace only!")
                     }
